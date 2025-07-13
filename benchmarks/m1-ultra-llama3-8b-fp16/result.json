@@ -1,0 +1,13 @@
+{
+    "model": "Llama-3-8B-Instruct",
+    "chip": "Apple M1 Ultra",
+    "precision": "FP16",
+    "batch_size": 1,
+    "concurrency": 1,
+    "ttft_ms": 45.2,
+    "tps": 89.7,
+    "power_w_avg": 65.3,
+    "timestamp": "2025-01-12T17:41:18Z",
+    "input_length": 256,
+    "output_length": 128
+}
