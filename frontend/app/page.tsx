@@ -26,7 +26,7 @@ import {
   OutlinedInput,
   SelectChangeEvent,
 } from '@mui/material';
-import { ScatterPlot } from '@nivo/scatterplot';
+import { ResponsiveScatterPlot } from '@nivo/scatterplot';
 
 interface FilterState {
   chip: string[];
@@ -48,6 +48,7 @@ function TabPanel(props: TabPanelProps) {
       hidden={value !== index}
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
+      style={{ height: '100%' }}
       {...other}
     >
       {value === index && <Box sx={{ height: '100%', overflow: 'hidden' }}>{children}</Box>}
@@ -64,9 +65,9 @@ export default function Dashboard() {
     precision: []
   });
 
-  // Chart tab state
-  const [xMetric, setXMetric] = useState('tps');
-  const [yMetric, setYMetric] = useState('ttft_ms');
+  // Chart tab state - fixed axes
+  const xMetric = 'concurrency';
+  const yMetric = 'tps';
 
   // Table tab state
   const [sortBy, setSortBy] = useState('timestamp');
@@ -159,6 +160,8 @@ export default function Dashboard() {
     const value = event.target.value as string[];
     updateFilter(key, value);
   };
+
+
 
   if (allData.length === 0) {
     return (
@@ -319,51 +322,32 @@ export default function Dashboard() {
       {/* Content Area */}
       <Box sx={{ flexGrow: 1, overflow: 'hidden', width: '100%', height: '100%' }}>
         <TabPanel value={activeTab} index={0}>
-          <Box sx={{ height: '100%', width: '100%' }}>
-            {/* Chart Controls */}
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', px: 2, py: 1, borderBottom: 1, borderColor: 'divider' }}>
-              <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
-                <InputLabel sx={{ fontSize: 12 }}>X Axis</InputLabel>
-                <Select
-                  value={xMetric}
-                  label="X Axis"
-                  onChange={(e) => setXMetric(e.target.value)}
-                  sx={{ fontSize: 12, height: 32 }}
-                >
-                  <MenuItem value="tps">Throughput (TPS)</MenuItem>
-                  <MenuItem value="ttft_ms">Time to First Token (ms)</MenuItem>
-                  <MenuItem value="power_w_avg">Power (W)</MenuItem>
-                  <MenuItem value="batch_size">Batch Size</MenuItem>
-                  <MenuItem value="concurrency">Concurrency</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl size="small" variant="outlined" sx={{ minWidth: 120 }}>
-                <InputLabel sx={{ fontSize: 12 }}>Y Axis</InputLabel>
-                <Select
-                  value={yMetric}
-                  label="Y Axis"
-                  onChange={(e) => setYMetric(e.target.value)}
-                  sx={{ fontSize: 12, height: 32 }}
-                >
-                  <MenuItem value="tps">Throughput (TPS)</MenuItem>
-                  <MenuItem value="ttft_ms">Time to First Token (ms)</MenuItem>
-                  <MenuItem value="power_w_avg">Power (W)</MenuItem>
-                  <MenuItem value="batch_size">Batch Size</MenuItem>
-                  <MenuItem value="concurrency">Concurrency</MenuItem>
-                </Select>
-              </FormControl>
+          <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
+            {/* Chart Controls - Left Panel (20% width) */}
+            <Box sx={{
+              width: '20%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              p: 2,
+              borderRight: 1,
+              borderColor: 'divider'
+            }}>
+
             </Box>
 
-            {/* Chart */}
-            <Box sx={{ height: 'calc(100% - 60px)', width: '100%' }}>
+            {/* Chart - Right Panel (80% width) */}
+            <Box sx={{ width: '80%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
               {chartData[0]?.data.length === 0 ? (
                 <Box sx={{
-                  height: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexDirection: 'column',
-                  gap: 2
+                  gap: 2,
+                  height: '100%',
+                  width: '100%'
                 }}>
                   <Typography variant="h6" color="text.secondary">
                     No data to display
@@ -373,71 +357,73 @@ export default function Dashboard() {
                   </Typography>
                 </Box>
               ) : (
-                <ScatterPlot
-                  width={800}
-                  height={400}
-                  data={chartData}
-                  margin={{ top: 60, right: 140, bottom: 70, left: 90 }}
-                  xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-                  yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-                  colors={{ scheme: 'category10' }}
-                  blendMode="multiply"
-                  axisTop={null}
-                  axisRight={null}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: getMetricLabel(xMetric),
-                    legendPosition: 'middle',
-                    legendOffset: 46
-                  }}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legend: getMetricLabel(yMetric),
-                    legendPosition: 'middle',
-                    legendOffset: -60
-                  }}
-                  legends={[
-                    {
-                      anchor: 'bottom-right',
-                      direction: 'column',
-                      justify: false,
-                      translateX: 130,
-                      translateY: 0,
-                      itemWidth: 100,
-                      itemHeight: 12,
-                      itemsSpacing: 5,
-                      itemDirection: 'left-to-right',
-                      symbolSize: 12,
-                      symbolShape: 'circle',
-                      effects: [
-                        {
-                          on: 'hover',
-                          style: {
-                            itemOpacity: 1
+                <Box sx={{ width: '100%', height: '100%', minHeight: '400px' }}>
+                  <ResponsiveScatterPlot
+                    data={chartData}
+                    margin={{ top: 60, right: 140, bottom: 70, left: 90 }}
+                    xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+                    yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+                    colors={{ scheme: 'category10' }}
+                    blendMode="multiply"
+                    axisTop={null}
+                    axisRight={null}
+                    axisBottom={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: 0,
+                      legend: getMetricLabel(xMetric),
+                      legendPosition: 'middle',
+                      legendOffset: 46
+                    }}
+                    axisLeft={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: 0,
+                      legend: getMetricLabel(yMetric),
+                      legendPosition: 'middle',
+                      legendOffset: -60
+                    }}
+                    legends={[
+                      {
+                        anchor: 'bottom-right',
+                        direction: 'column',
+                        justify: false,
+                        translateX: 130,
+                        translateY: 0,
+                        itemWidth: 100,
+                        itemHeight: 12,
+                        itemsSpacing: 5,
+                        itemDirection: 'left-to-right',
+                        symbolSize: 12,
+                        symbolShape: 'circle',
+                        effects: [
+                          {
+                            on: 'hover',
+                            style: {
+                              itemOpacity: 1
+                            }
                           }
-                        }
-                      ]
-                    }
-                  ]}
-                  tooltip={({ node }) => (
-                    <div style={{
-                      background: 'white',
-                      padding: '9px 12px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}>
-                      <strong>{node.data.chip}</strong><br />
-                      {node.data.model} ({node.data.precision})<br />
-                      {getMetricLabel(xMetric)}: {node.data.x}<br />
-                      {getMetricLabel(yMetric)}: {node.data.y}
-                    </div>
-                  )}
-                />
+                        ]
+                      }
+                    ]}
+                    tooltip={({ node }: { node: { data: { chip: string; model: string; precision: string; x: number; y: number; }; }; }) => (
+                      <div style={{
+                        background: 'white',
+                        padding: '12px 16px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        minWidth: '200px',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        <strong>{node.data.chip}</strong><br />
+                        {node.data.model} ({node.data.precision})<br />
+                        {getMetricLabel(xMetric)}: {node.data.x}<br />
+                        {getMetricLabel(yMetric)}: {node.data.y}
+                      </div>
+                    )}
+                  />
+                </Box>
               )}
             </Box>
           </Box>

@@ -159,7 +159,7 @@ venv.bak/
 .idea/
 
 # Build scripts output
-scripts/*.log
+scripts/*.log 
 scripts/temp/
 
 # Local development
