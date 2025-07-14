@@ -1,108 +1,170 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { validateIndex, type BenchmarkResult } from '@/lib/schemas/benchmark';
+import {
+  validateDataFile,
+  convertToFrontendFormat,
+  type BenchmarkResult,
+  type BenchmarkDataFile,
+  AVAILABLE_MODELS,
+  AVAILABLE_CHIPS,
+  AVAILABLE_PRECISIONS,
+  filterBenchmarkResults
+} from '@/lib/schemas/benchmark';
 
-// Load results.index.json using fetch
-const loadBenchmarkData = async (): Promise<BenchmarkResult[]> => {
+// Load benchmark data for a specific model/chip/precision combination
+const loadBenchmarkDataFile = async (model: string, chip: string, precision: string): Promise<BenchmarkResult[]> => {
   try {
-    const response = await fetch('/data/results.index.json');
+    const response = await fetch(`/data/benchmarks/${model}/${chip}/${precision}/data.json`);
 
     if (!response.ok) {
-      throw new Error(`Failed to load benchmark data: ${response.status}`);
+      console.warn(`Failed to load data for ${model}/${chip}/${precision}: ${response.status}`);
+      return [];
     }
 
     const data = await response.json();
 
     try {
-      const validatedData = validateIndex(data);
-      return validatedData;
+      const validatedData = validateDataFile(data);
+      // Convert to frontend format
+      return validatedData.map(dataPoint => convertToFrontendFormat(dataPoint, chip, precision));
     } catch (validationError) {
-      console.error('Validation failed:', validationError);
-      return data; // Return raw data if validation fails
+      console.error('Validation failed for', model, chip, precision, ':', validationError);
+      // Try to convert raw data anyway
+      return data.map((dataPoint: any) => convertToFrontendFormat(dataPoint, chip, precision));
     }
   } catch (error) {
-    console.error('Error loading benchmark data:', error);
+    console.error(`Error loading benchmark data for ${model}/${chip}/${precision}:`, error);
     return [];
   }
 };
 
+// Load all available benchmark data
+const loadAllBenchmarkData = async (): Promise<BenchmarkResult[]> => {
+  const allData: BenchmarkResult[] = [];
+
+  for (const model of AVAILABLE_MODELS) {
+    for (const chip of AVAILABLE_CHIPS) {
+      for (const precision of AVAILABLE_PRECISIONS) {
+        const data = await loadBenchmarkDataFile(model, chip, precision);
+        allData.push(...data);
+      }
+    }
+  }
+
+  return allData;
+};
+
 export function useBenchmarkData() {
   const [results, setResults] = useState<BenchmarkResult[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadBenchmarkData().then(data => {
+    loadAllBenchmarkData().then(data => {
       setResults(data);
+      setLoading(false);
     }).catch(error => {
       console.error('Error in data loading:', error);
       setResults([]);
+      setLoading(false);
     });
   }, []);
 
-  return results;
+  return { results, loading };
+}
+
+// Hook for model-centric data loading
+export function useModelBenchmarkData(selectedModel: string) {
+  const [results, setResults] = useState<BenchmarkResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!selectedModel) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    const loadModelData = async () => {
+      setLoading(true);
+      const allData: BenchmarkResult[] = [];
+
+      for (const chip of AVAILABLE_CHIPS) {
+        for (const precision of AVAILABLE_PRECISIONS) {
+          const data = await loadBenchmarkDataFile(selectedModel, chip, precision);
+          allData.push(...data);
+        }
+      }
+
+      setResults(allData);
+      setLoading(false);
+    };
+
+    loadModelData();
+  }, [selectedModel]);
+
+  return { results, loading };
 }
 
 // Hook for filtering and computing derived data
-export function useFilteredBenchmarkData(filters?: {
-  chip?: string;
-  model?: string;
-  precision?: string;
-}) {
-  const data = useBenchmarkData();
-
-  const filteredData = useMemo(() => {
+export function useFilteredBenchmarkData(
+  data: BenchmarkResult[],
+  filters?: {
+    chips?: string[];
+    precisions?: string[];
+    concurrencies?: number[];
+  }
+) {
+  return useMemo(() => {
     if (!filters) return data;
 
-    return data.filter(result => {
-      return (!filters.chip || result.chip === filters.chip) &&
-        (!filters.model || result.model === filters.model) &&
-        (!filters.precision || result.precision === filters.precision);
+    return filterBenchmarkResults(data, {
+      chips: filters.chips,
+      precisions: filters.precisions,
+      concurrencies: filters.concurrencies
     });
   }, [data, filters]);
-
-  return filteredData;
 }
 
-// Hook for computing KPI statistics
+// Hook for getting available filter options from data
+export function useFilterOptions(data: BenchmarkResult[]) {
+  return useMemo(() => {
+    const models = Array.from(new Set(data.map(d => d.model))).sort();
+    const chips = Array.from(new Set(data.map(d => d.chip))).sort();
+    const precisions = Array.from(new Set(data.map(d => d.precision))).sort();
+    const concurrencies = Array.from(new Set(data.map(d => d.concurrency))).sort((a, b) => a - b);
+
+    return { models, chips, precisions, concurrencies };
+  }, [data]);
+}
+
 export function useBenchmarkKPIs(data: BenchmarkResult[]) {
   return useMemo(() => {
     if (data.length === 0) {
       return {
-        ttft: { min: 0, max: 0, median: 0 },
-        tps: { min: 0, max: 0, median: 0 },
-        power: { min: 0, max: 0, median: 0 },
-        efficiency: { min: 0, max: 0, median: 0 } // TPS per Watt
+        avgThroughput: 0,
+        avgLatency: 0,
+        totalRequests: 0,
+        avgPower: 0
       };
     }
 
-    const sortedTtft = [...data].sort((a, b) => a.ttft_ms - b.ttft_ms);
-    const sortedTps = [...data].sort((a, b) => a.tps - b.tps);
-    const sortedPower = [...data].sort((a, b) => a.power_w_avg - b.power_w_avg);
-    const sortedEfficiency = [...data].sort((a, b) => (a.tps / a.power_w_avg) - (b.tps / b.power_w_avg));
+    const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
+    const avg = (arr: number[]): number => arr.length > 0 ? sum(arr) / arr.length : 0;
 
-    const median = <T>(arr: T[]): T => arr[Math.floor(arr.length / 2)];
+    const throughputs = data.map(d => d.tps);
+    const latencies = data.map(d => d.ttft_ms);
+    const requests = data.map(d => d.successful_requests);
+    const powers = data.map(d => d.power_w_avg).filter(p => p !== undefined) as number[];
 
     return {
-      ttft: {
-        min: sortedTtft[0].ttft_ms,
-        max: sortedTtft[sortedTtft.length - 1].ttft_ms,
-        median: median(sortedTtft).ttft_ms
-      },
-      tps: {
-        min: sortedTps[0].tps,
-        max: sortedTps[sortedTps.length - 1].tps,
-        median: median(sortedTps).tps
-      },
-      power: {
-        min: sortedPower[0].power_w_avg,
-        max: sortedPower[sortedPower.length - 1].power_w_avg,
-        median: median(sortedPower).power_w_avg
-      },
-      efficiency: {
-        min: sortedEfficiency[0].tps / sortedEfficiency[0].power_w_avg,
-        max: sortedEfficiency[sortedEfficiency.length - 1].tps / sortedEfficiency[sortedEfficiency.length - 1].power_w_avg,
-        median: median(sortedEfficiency).tps / median(sortedEfficiency).power_w_avg
-      }
+      avgThroughput: avg(throughputs),
+      avgLatency: avg(latencies),
+      totalRequests: sum(requests),
+      avgPower: powers.length > 0 ? avg(powers) : 0
     };
   }, [data]);
-} 
+}
+
+// Export constants for use in components
+export { AVAILABLE_MODELS, AVAILABLE_CHIPS, AVAILABLE_PRECISIONS }; 

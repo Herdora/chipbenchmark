@@ -9,31 +9,85 @@ const __dirname = path.dirname(__filename);
 // Paths
 const benchmarksDir = path.join(__dirname, '../benchmarks');
 const frontendDataDir = path.join(__dirname, '../frontend/public/data');
+const frontendBenchmarksDir = path.join(frontendDataDir, 'benchmarks');
 
-// Ensure frontend data directory exists
+// Ensure frontend data directories exist
 if (!fs.existsSync(frontendDataDir)) {
     fs.mkdirSync(frontendDataDir, { recursive: true });
 }
 
-// Function to collect all benchmark results
-function collectBenchmarkResults() {
+if (!fs.existsSync(frontendBenchmarksDir)) {
+    fs.mkdirSync(frontendBenchmarksDir, { recursive: true });
+}
+
+// Function to fix common JSON issues
+function fixJsonString(jsonString) {
+    // Remove trailing commas before closing braces and brackets
+    return jsonString
+        .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
+        .replace(/([}\]]),(\s*[}\]])/g, '$1$2'); // Remove commas between closing braces
+}
+
+// Function to safely parse JSON with error recovery
+function safeJsonParse(jsonString, filePath) {
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.log(`⚠️  JSON parse error in ${filePath}, attempting to fix...`);
+        try {
+            const fixedJson = fixJsonString(jsonString);
+            const result = JSON.parse(fixedJson);
+            console.log(`✓ Successfully fixed JSON in ${filePath}`);
+            return result;
+        } catch (fixError) {
+            console.error(`✗ Could not fix JSON in ${filePath}:`, fixError.message);
+            throw fixError;
+        }
+    }
+}
+
+// Function to recursively traverse benchmark directories
+function traverseBenchmarkDirectories(baseDir, relativePath = '') {
     const results = [];
+    const fullPath = path.join(baseDir, relativePath);
 
-    // Read all subdirectories in benchmarks
-    const benchmarkDirs = fs.readdirSync(benchmarksDir, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+    if (!fs.existsSync(fullPath)) {
+        return results;
+    }
 
-    for (const dir of benchmarkDirs) {
-        const resultPath = path.join(benchmarksDir, dir, 'result.json');
+    const items = fs.readdirSync(fullPath, { withFileTypes: true });
 
-        if (fs.existsSync(resultPath)) {
+    for (const item of items) {
+        const itemPath = path.join(relativePath, item.name);
+        const fullItemPath = path.join(baseDir, itemPath);
+
+        if (item.isDirectory()) {
+            // Recursively traverse subdirectories
+            results.push(...traverseBenchmarkDirectories(baseDir, itemPath));
+        } else if (item.name === 'data.json') {
+            // Found a data.json file, process it
             try {
-                const resultData = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
-                results.push(resultData);
-                console.log(`✓ Loaded benchmark: ${resultData.chip} - ${resultData.model} (${resultData.precision})`);
+                const jsonString = fs.readFileSync(fullItemPath, 'utf8');
+                const data = safeJsonParse(jsonString, fullItemPath);
+
+                // Extract model, chip, precision from the path
+                const pathParts = relativePath.split(path.sep);
+                if (pathParts.length >= 3) {
+                    const [model, chip, precision] = pathParts;
+
+                    results.push({
+                        model,
+                        chip,
+                        precision,
+                        path: relativePath,
+                        data: data,
+                        sourcePath: fullItemPath
+                    });
+
+                    console.log(`✓ Found benchmark: ${model}/${chip}/${precision} (${data.length} data points)`);
+                }
             } catch (error) {
-                console.error(`✗ Error loading ${resultPath}:`, error.message);
+                console.error(`✗ Error loading ${fullItemPath}:`, error.message);
             }
         }
     }
@@ -41,32 +95,84 @@ function collectBenchmarkResults() {
     return results;
 }
 
+// Function to copy benchmark data to frontend structure
+function copyBenchmarkData(benchmarkInfo) {
+    const { model, chip, precision, data, sourcePath } = benchmarkInfo;
+
+    // Create target directory structure
+    const targetDir = path.join(frontendBenchmarksDir, model, chip, precision);
+    if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // Copy data.json file
+    const targetPath = path.join(targetDir, 'data.json');
+    fs.writeFileSync(targetPath, JSON.stringify(data, null, 2));
+
+    console.log(`✓ Copied: ${model}/${chip}/${precision}/data.json`);
+
+    return {
+        model,
+        chip,
+        precision,
+        dataPoints: data.length,
+        targetPath
+    };
+}
+
+// Function to create index file with metadata
+function createIndexFile(copiedBenchmarks) {
+    const indexData = {
+        lastUpdated: new Date().toISOString(),
+        benchmarks: copiedBenchmarks.map(b => ({
+            model: b.model,
+            chip: b.chip,
+            precision: b.precision,
+            dataPoints: b.dataPoints,
+            path: `benchmarks/${b.model}/${b.chip}/${b.precision}/data.json`
+        }))
+    };
+
+    const indexPath = path.join(frontendDataDir, 'benchmarks.index.json');
+    fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2));
+
+    console.log(`✓ Created index file: ${indexPath}`);
+    return indexPath;
+}
+
 // Main function
 function syncBenchmarkData() {
     console.log('🔄 Syncing benchmark data...');
 
-    // Collect all benchmark results
-    const results = collectBenchmarkResults();
-
-    if (results.length === 0) {
-        console.log('⚠️  No benchmark results found');
+    // Check if benchmarks directory exists
+    if (!fs.existsSync(benchmarksDir)) {
+        console.error('✗ Benchmarks directory not found:', benchmarksDir);
         return;
     }
 
-    // Write results.index.json
-    const indexPath = path.join(frontendDataDir, 'results.index.json');
-    fs.writeFileSync(indexPath, JSON.stringify(results, null, 2));
-    console.log(`✓ Written ${results.length} results to ${indexPath}`);
+    // Traverse and collect all benchmark data
+    const benchmarkInfos = traverseBenchmarkDirectories(benchmarksDir);
 
-    // Copy individual result files with standardized names
-    for (const result of results) {
-        const fileName = `${result.chip.toLowerCase().replace(/\s+/g, '-')}-${result.model.toLowerCase().replace(/\s+/g, '-')}-${result.precision.toLowerCase()}.json`;
-        const targetPath = path.join(frontendDataDir, fileName);
-        fs.writeFileSync(targetPath, JSON.stringify(result, null, 2));
-        console.log(`✓ Written individual file: ${fileName}`);
+    if (benchmarkInfos.length === 0) {
+        console.log('⚠️  No benchmark data found');
+        return;
     }
 
-    console.log('✅ Benchmark data sync complete!');
+    console.log(`📊 Found ${benchmarkInfos.length} benchmark configurations`);
+
+    // Copy each benchmark to frontend structure
+    const copiedBenchmarks = [];
+    for (const benchmarkInfo of benchmarkInfos) {
+        const copied = copyBenchmarkData(benchmarkInfo);
+        copiedBenchmarks.push(copied);
+    }
+
+    // Create index file
+    createIndexFile(copiedBenchmarks);
+
+    // Summary
+    const totalDataPoints = copiedBenchmarks.reduce((sum, b) => sum + b.dataPoints, 0);
+    console.log(`✅ Sync complete! Copied ${copiedBenchmarks.length} benchmarks with ${totalDataPoints} total data points`);
 }
 
 // Run the sync

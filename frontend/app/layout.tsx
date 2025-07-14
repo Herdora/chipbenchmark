@@ -8,7 +8,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Image from 'next/image';
@@ -93,13 +92,6 @@ export default function RootLayout({
                   {/* Right side items */}
                   <Box sx={{ flexGrow: 1 }} />
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Chip
-                      label="v1.0"
-                      color="primary"
-                      variant="outlined"
-                      size="medium"
-                      sx={{ height: 28, fontSize: 13 }}
-                    />
                     <Link
                       href="https://github.com/Herdora/chipbenchmark"
                       target="_blank"
