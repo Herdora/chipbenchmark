@@ -57,9 +57,11 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
           size="small"
           endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           sx={{
-            fontSize: 12,
+            fontSize: { xs: 10, md: 12 },
             textTransform: 'none',
             width: '100%',
+            minWidth: { xs: 140, md: 'auto' },
+            height: { xs: 28, md: 32 },
             justifyContent: 'space-between',
             borderColor: 'divider',
             color: 'text.primary',
@@ -73,9 +75,9 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
         </Button>
 
         <Collapse in={expanded}>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: { xs: 1, md: 2 } }}>
             <form onSubmit={handleSubmit}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1, md: 2 } }}>
                 <TextField
                   size="small"
                   label="Suggest benchmark"
@@ -84,10 +86,10 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
                   required
                   multiline
                   rows={3}
-                  placeholder="model, chip, precision, concurrency, anything really."
+                  placeholder="model, chip, precision, concurrency, anythign really"
                   sx={{
-                    '& .MuiInputBase-input': { fontSize: 12 },
-                    '& .MuiInputLabel-root': { fontSize: 12 }
+                    '& .MuiInputBase-input': { fontSize: { xs: 10, md: 12 } },
+                    '& .MuiInputLabel-root': { fontSize: { xs: 10, md: 12 } }
                   }}
                 />
 
@@ -98,8 +100,9 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
                   disabled={!isFormValid}
                   startIcon={<SendIcon />}
                   sx={{
-                    fontSize: 12,
+                    fontSize: { xs: 10, md: 12 },
                     textTransform: 'none',
+                    height: { xs: 28, md: 32 },
                     bgcolor: 'primary.main',
                     '&:hover': {
                       bgcolor: 'primary.dark'

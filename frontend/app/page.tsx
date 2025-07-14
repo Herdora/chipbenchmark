@@ -23,6 +23,7 @@ import {
   OutlinedInput,
   SelectChangeEvent,
   CircularProgress,
+  TablePagination,
 } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
 import { RequestBenchmark } from '@/components/RequestHardware';
@@ -68,6 +69,11 @@ export default function Dashboard() {
     }
   }, [discovery, discoveryLoading, selectedModel]);
 
+  // Reset page when model changes
+  React.useEffect(() => {
+    setPage(0);
+  }, [selectedModel]);
+
   // Load data for selected model
   const { results: modelData, loading } = useModelBenchmarkData(selectedModel);
 
@@ -82,6 +88,8 @@ export default function Dashboard() {
   // Table tab state
   const [sortBy, setSortBy] = useState('concurrency');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
 
   // Chart axis selectors
   const [xMetric, setXMetric] = useState('concurrency');
@@ -198,8 +206,16 @@ export default function Dashboard() {
     return data;
   }, [tableFilteredData, sortBy, sortDirection]);
 
+  // Paginated table data
+  const paginatedTableData = useMemo(() => {
+    const startIndex = page * rowsPerPage;
+    return tableData.slice(startIndex, startIndex + rowsPerPage);
+  }, [tableData, page, rowsPerPage]);
+
   const updateFilter = (key: keyof FilterState, value: string[]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
+    // Reset to first page when filters change
+    setPage(0);
   };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -213,6 +229,17 @@ export default function Dashboard() {
       setSortBy(column);
       setSortDirection('asc');
     }
+    // Reset to first page when sorting
+    setPage(0);
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleMultiSelectChange = (key: keyof FilterState) => (event: SelectChangeEvent<string[]>) => {
@@ -278,26 +305,28 @@ export default function Dashboard() {
       flexDirection: 'column',
       height: '100%',
       width: '100%',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      minWidth: 0 // Prevent flex items from overflowing
     }}>
       {/* Model Selection and Filters */}
       <Box sx={{
         display: 'flex',
-        gap: 2,
-        p: 2,
+        gap: { xs: 1, md: 2 },
+        p: { xs: 1, md: 2 },
         borderBottom: 1,
         borderColor: 'divider',
         alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        overflow: 'auto'
       }}>
         {/* Primary Model Selector */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel sx={{ fontSize: 12 }}>Model</InputLabel>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 200 } }}>
+          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Model</InputLabel>
           <Select
             value={selectedModel}
             label="Model"
             onChange={(e) => setSelectedModel(e.target.value)}
-            sx={{ fontSize: 12, height: 32 }}
+            sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
           >
             {discovery && discovery.models.length > 0 ? (
               discovery.models.map((model) => (
@@ -314,8 +343,8 @@ export default function Dashboard() {
         </FormControl>
 
         {/* Secondary Filters */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: 150 }}>
-          <InputLabel sx={{ fontSize: 12 }}>Chips</InputLabel>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 100, md: 150 } }}>
+          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Chips</InputLabel>
           <Select
             multiple
             value={filters.chips}
@@ -329,7 +358,7 @@ export default function Dashboard() {
                   ? 'All Chips'
                   : `${selected.length} selected`
             }
-            sx={{ fontSize: 12, minHeight: 32 }}
+            sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
           >
             {filterOptions.chips.length > 0 ? (
               [
@@ -370,8 +399,8 @@ export default function Dashboard() {
           </Select>
         </FormControl>
 
-        <FormControl size="small" variant="outlined" sx={{ minWidth: 150 }}>
-          <InputLabel sx={{ fontSize: 12 }}>Precisions</InputLabel>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 100, md: 150 } }}>
+          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Precisions</InputLabel>
           <Select
             multiple
             value={filters.precisions}
@@ -385,7 +414,7 @@ export default function Dashboard() {
                   ? 'All Precisions'
                   : `${selected.length} selected`
             }
-            sx={{ fontSize: 12, minHeight: 32 }}
+            sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
           >
             {filterOptions.precisions.length > 0 ? (
               [
@@ -428,8 +457,14 @@ export default function Dashboard() {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>
-          {tableFilteredData.length} of {modelData.length} results
+        <Typography variant="body2" color="text.secondary" sx={{
+          fontSize: { xs: 10, md: 12 },
+          whiteSpace: 'nowrap'
+        }}>
+          {activeTab === 0
+            ? `${tableFilteredData.length} of ${modelData.length} results`
+            : `Showing ${Math.min(page * rowsPerPage + 1, tableData.length)}-${Math.min((page + 1) * rowsPerPage, tableData.length)} of ${tableData.length} results`
+          }
         </Typography>
       </Box>
 
@@ -453,81 +488,123 @@ export default function Dashboard() {
       {/* Content Area */}
       <Box sx={{ flexGrow: 1, overflow: 'hidden', width: '100%', height: '100%' }}>
         <TabPanel value={activeTab} index={0}>
-          <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
+          <Box sx={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' }
+          }}>
             {/* Left side - Axis and I/O selectors */}
             <Box sx={{
-              width: '20%',
-              borderRight: 1,
+              width: { xs: '100%', md: '280px', lg: '320px' },
+              minWidth: { md: '250px' },
+              maxWidth: { xs: '100%', md: '350px' },
+              borderRight: { xs: 0, md: 1 },
+              borderBottom: { xs: 1, md: 0 },
               borderColor: 'divider',
-              p: 2,
+              p: { xs: 1, md: 2 },
               display: 'flex',
-              flexDirection: 'column',
-              gap: 2
+              flexDirection: { xs: 'row', md: 'column' },
+              gap: { xs: 1, md: 2 },
+              flexWrap: { xs: 'wrap', md: 'nowrap' },
+              alignItems: { xs: 'flex-start', md: 'stretch' },
+              maxHeight: { xs: 'auto', md: '100%' },
+              overflowY: { xs: 'visible', md: 'auto' }
             }}>
-              <Typography variant="h6" sx={{ fontSize: 14, fontWeight: 600, mb: 1 }}>
-                Chart Configuration
-              </Typography>
+              <Box sx={{
+                width: { xs: '100%', md: 'auto' },
+                minWidth: { xs: 'auto', md: '100%' },
+                display: 'flex',
+                flexDirection: 'column',
+                gap: { xs: 1, md: 2 }
+              }}>
+                <Typography variant="h6" sx={{
+                  fontSize: { xs: 12, md: 14 },
+                  fontWeight: 600,
+                  mb: { xs: 0.5, md: 1 },
+                  display: { xs: 'none', md: 'block' }
+                }}>
+                  Chart Configuration
+                </Typography>
 
-              <FormControl size="small" variant="outlined" fullWidth>
-                <InputLabel sx={{ fontSize: 12 }}>Y-Axis</InputLabel>
-                <Select
-                  value={yMetric}
-                  label="Y-Axis"
-                  onChange={(e) => setYMetric(e.target.value)}
-                  sx={{ fontSize: 12, height: 32 }}
-                >
-                  {availableMetrics.map((metric) => (
-                    <MenuItem key={metric.value} value={metric.value}>
-                      {metric.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Y-Axis</InputLabel>
+                  <Select
+                    value={yMetric}
+                    label="Y-Axis"
+                    onChange={(e) => setYMetric(e.target.value)}
+                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                  >
+                    {availableMetrics.map((metric) => (
+                      <MenuItem key={metric.value} value={metric.value}>
+                        {metric.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <FormControl size="small" variant="outlined" fullWidth>
-                <InputLabel sx={{ fontSize: 12 }}>X-Axis</InputLabel>
-                <Select
-                  value={xMetric}
-                  label="X-Axis"
-                  onChange={(e) => setXMetric(e.target.value)}
-                  sx={{ fontSize: 12, height: 32 }}
-                >
-                  {availableMetrics.map((metric) => (
-                    <MenuItem key={metric.value} value={metric.value}>
-                      {metric.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>X-Axis</InputLabel>
+                  <Select
+                    value={xMetric}
+                    label="X-Axis"
+                    onChange={(e) => setXMetric(e.target.value)}
+                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                  >
+                    {availableMetrics.map((metric) => (
+                      <MenuItem key={metric.value} value={metric.value}>
+                        {metric.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <Typography variant="h6" sx={{ fontSize: 14, fontWeight: 600, mt: 2, mb: 1 }}>
-                I/O Configuration
-              </Typography>
+                <Typography variant="h6" sx={{
+                  fontSize: { xs: 12, md: 14 },
+                  fontWeight: 600,
+                  mt: { xs: 0, md: 2 },
+                  mb: { xs: 0.5, md: 1 },
+                  display: { xs: 'none', md: 'block' }
+                }}>
+                  I/O Configuration
+                </Typography>
 
-              <FormControl size="small" variant="outlined" fullWidth>
-                <InputLabel sx={{ fontSize: 12 }}>Input/Output</InputLabel>
-                <Select
-                  value={chartIoConfig}
-                  label="Input/Output"
-                  onChange={(e) => setChartIoConfig(e.target.value)}
-                  sx={{ fontSize: 12, height: 32 }}
-                >
-                  {ioOptions.map((config) => (
-                    <MenuItem key={config} value={config}>
-                      {config}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Input/Output</InputLabel>
+                  <Select
+                    value={chartIoConfig}
+                    label="Input/Output"
+                    onChange={(e) => setChartIoConfig(e.target.value)}
+                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                  >
+                    {ioOptions.map((config) => (
+                      <MenuItem key={config} value={config}>
+                        {config}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              <RequestBenchmark />
+                <RequestBenchmark />
+              </Box>
             </Box>
 
             {/* Right side - Chart */}
-            <Box sx={{ width: '80%', height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
+            <Box sx={{
+              flex: 1,
+              height: { xs: 'calc(100% - 120px)', md: '100%' },
+              minHeight: { xs: '400px', md: 'auto' },
+              display: 'flex',
+              flexDirection: 'column',
+              p: { xs: 1, md: 2 },
+              overflow: 'hidden'
+            }}>
               {/* Chart Title */}
-              <Box sx={{ mb: 2, textAlign: 'center' }}>
-                <Typography variant="h6" sx={{ fontSize: 16, fontWeight: 600 }}>
+              <Box sx={{ mb: { xs: 1, md: 2 }, textAlign: 'center' }}>
+                <Typography variant="h6" sx={{
+                  fontSize: { xs: 14, md: 16 },
+                  fontWeight: 600
+                }}>
                   {chartTitle}
                 </Typography>
               </Box>
@@ -552,10 +629,10 @@ export default function Dashboard() {
                     </Typography>
                   </Box>
                 ) : (
-                  <Box sx={{ width: '100%', height: '100%', minHeight: '400px' }}>
+                  <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' } }}>
                     <ResponsiveLine
                       data={chartData}
-                      margin={{ top: 60, right: 140, bottom: 70, left: 90 }}
+                      margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
                       xScale={{
                         type: 'linear',
                         min: 'auto',
@@ -599,13 +676,13 @@ export default function Dashboard() {
                           anchor: 'bottom-right',
                           direction: 'column',
                           justify: false,
-                          translateX: 130,
+                          translateX: 50,
                           translateY: 0,
-                          itemWidth: 100,
-                          itemHeight: 16,
-                          itemsSpacing: 8,
+                          itemWidth: 80,
+                          itemHeight: 14,
+                          itemsSpacing: 6,
                           itemDirection: 'left-to-right',
-                          symbolSize: 14,
+                          symbolSize: 12,
                           symbolShape: 'circle',
                           effects: [
                             {
@@ -646,7 +723,11 @@ export default function Dashboard() {
         <TabPanel value={activeTab} index={1}>
           <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
             {/* Table */}
-            <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
+            <TableContainer component={Paper} sx={{
+              flexGrow: 1,
+              overflow: 'auto',
+              maxHeight: 'calc(100% - 60px)' // Reserve space for pagination
+            }}>
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
@@ -733,8 +814,8 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {tableData.map((row, index) => (
-                    <TableRow key={index} hover>
+                  {paginatedTableData.map((row, index) => (
+                    <TableRow key={page * rowsPerPage + index} hover>
                       <TableCell sx={{ fontSize: 11 }}>{row.chip}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.precision.toUpperCase()}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.input_sequence_length}</TableCell>
@@ -748,6 +829,29 @@ export default function Dashboard() {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            {/* Table Pagination */}
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 50, 100]}
+              component="div"
+              count={tableData.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              sx={{
+                borderTop: 1,
+                borderColor: 'divider',
+                backgroundColor: 'background.paper',
+                '& .MuiTablePagination-toolbar': {
+                  fontSize: { xs: 11, md: 14 },
+                  minHeight: { xs: 42, md: 52 }
+                },
+                '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                  fontSize: { xs: 11, md: 14 }
+                }
+              }}
+            />
           </Box>
         </TabPanel>
       </Box>
