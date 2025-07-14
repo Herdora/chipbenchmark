@@ -188,5 +188,12 @@ export const theme = createTheme({
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: '#1A237E', // Navy blue color for dropdown arrow
+        },
+      },
+    },
   },
 }); 

@@ -17,8 +17,8 @@ import logo from './logo.png';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "ChipBenchmark",
-  description: "A platform for monitoring the chip situation",
+  title: "chip benchmark",
+  description: "a platform for monitoring the chip situation",
 };
 
 export default function RootLayout({
@@ -56,7 +56,7 @@ export default function RootLayout({
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Image
                       src={logo}
-                      alt="ChipBenchmark Logo"
+                      alt="chip benchmark Logo"
                       width={48}
                       height={48}
                       style={{ objectFit: 'contain' }}
@@ -73,7 +73,7 @@ export default function RootLayout({
                           mb: 0.5
                         }}
                       >
-                        ChipBenchmark
+                        chip benchmark
                       </Typography>
                       <Typography
                         variant="body2"
@@ -84,7 +84,7 @@ export default function RootLayout({
                           lineHeight: 1
                         }}
                       >
-                        A platform for monitoring the chip situation
+                        a platform for monitoring the chip situation
                       </Typography>
                     </Box>
                   </Box>
