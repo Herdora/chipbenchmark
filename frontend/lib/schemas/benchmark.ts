@@ -4,10 +4,11 @@ import { z } from 'zod';
 // CONSTANTS AND ENUMS
 // =============================================================================
 
-// Available models in the system
-export const AVAILABLE_MODELS = ['llama3.3-70b'] as const;
-export const AVAILABLE_CHIPS = ['MI300X'] as const;
-export const AVAILABLE_PRECISIONS = ['bf16', 'fp8'] as const;
+// Available models, chips, and precisions are now loaded dynamically
+// These will be populated from the API
+export let AVAILABLE_MODELS: string[] = [];
+export let AVAILABLE_CHIPS: string[] = [];
+export let AVAILABLE_PRECISIONS: string[] = [];
 
 // Common concurrency values used in benchmarks
 export const COMMON_CONCURRENCY_VALUES = [1, 5, 100, 200] as const;
@@ -146,9 +147,9 @@ export type FilterState = z.infer<typeof FilterStateSchema>;
 export type ChartConfig = z.infer<typeof ChartConfigSchema>;
 
 // Utility types
-export type ModelName = typeof AVAILABLE_MODELS[number];
-export type ChipName = typeof AVAILABLE_CHIPS[number];
-export type PrecisionType = typeof AVAILABLE_PRECISIONS[number];
+export type ModelName = string;
+export type ChipName = string;
+export type PrecisionType = string;
 export type ConcurrencyValue = typeof COMMON_CONCURRENCY_VALUES[number];
 export type MetricKey = keyof typeof CHART_METRICS;
 
@@ -220,21 +221,21 @@ export function validateBenchmarkResult(data: unknown): BenchmarkResult {
  * Type guard to check if a value is a valid model name
  */
 export function isValidModel(value: string): value is ModelName {
-  return AVAILABLE_MODELS.includes(value as ModelName);
+  return AVAILABLE_MODELS.includes(value);
 }
 
 /**
  * Type guard to check if a value is a valid chip name
  */
 export function isValidChip(value: string): value is ChipName {
-  return AVAILABLE_CHIPS.includes(value as ChipName);
+  return AVAILABLE_CHIPS.includes(value);
 }
 
 /**
  * Type guard to check if a value is a valid precision type
  */
 export function isValidPrecision(value: string): value is PrecisionType {
-  return AVAILABLE_PRECISIONS.includes(value as PrecisionType);
+  return AVAILABLE_PRECISIONS.includes(value);
 }
 
 /**

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, AVAILABLE_MODELS } from '@/hooks/useBenchmarkData';
+import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery, AVAILABLE_MODELS } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
 import {
   Box,
@@ -55,8 +55,18 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Dashboard() {
+  // Load discovery data first
+  const { discovery, loading: discoveryLoading } = useBenchmarkDiscovery();
+
   // Primary model selection with proper default
-  const [selectedModel, setSelectedModel] = useState<string>(AVAILABLE_MODELS[0] || 'llama3.3-70b');
+  const [selectedModel, setSelectedModel] = useState<string>('');
+
+  // Set default model once discovery is loaded
+  React.useEffect(() => {
+    if (!discoveryLoading && discovery && discovery.models.length > 0 && !selectedModel) {
+      setSelectedModel(discovery.models[0]);
+    }
+  }, [discovery, discoveryLoading, selectedModel]);
 
   // Load data for selected model
   const { results: modelData, loading } = useModelBenchmarkData(selectedModel);
@@ -77,8 +87,9 @@ export default function Dashboard() {
   const [xMetric, setXMetric] = useState('concurrency');
   const [yMetric, setYMetric] = useState('tps');
 
-  // Combined I/O sequence length selector
-  const [ioConfig, setIoConfig] = useState<string>('200/200');
+  // I/O sequence length selectors - separate for chart and table
+  const [chartIoConfig, setChartIoConfig] = useState<string>('200/200');
+  const [tableIoConfig, setTableIoConfig] = useState<string>('all');
 
   // Get filter options from current model data with fallback
   const filterOptions = useFilterOptions(modelData);
@@ -95,34 +106,43 @@ export default function Dashboard() {
   }, [modelData]);
 
   // Apply filters and restrict to specific concurrency values
-  const ALLOWED_CONCURRENCIES = [1, 5, 100, 200];
+  const ALLOWED_CONCURRENCIES = [1, 64, 128, 256];
   const filteredData = useFilteredBenchmarkData(modelData, {
     chips: filters.chips,
     precisions: filters.precisions,
     concurrencies: ALLOWED_CONCURRENCIES
   });
 
-  // Further filter by I/O configuration
-  const ioFilteredData = useMemo(() => {
-    if (ioConfig === 'all') return filteredData;
-
-    const [inputLength, outputLength] = ioConfig.split('/').map(Number);
+  // Filter data for chart by I/O configuration
+  const chartFilteredData = useMemo(() => {
+    const [inputLength, outputLength] = chartIoConfig.split('/').map(Number);
     return filteredData.filter(item =>
       item.input_sequence_length === inputLength &&
       item.output_sequence_length === outputLength
     );
-  }, [filteredData, ioConfig]);
+  }, [filteredData, chartIoConfig]);
+
+  // Filter data for table by I/O configuration
+  const tableFilteredData = useMemo(() => {
+    if (tableIoConfig === 'all') return filteredData;
+
+    const [inputLength, outputLength] = tableIoConfig.split('/').map(Number);
+    return filteredData.filter(item =>
+      item.input_sequence_length === inputLength &&
+      item.output_sequence_length === outputLength
+    );
+  }, [filteredData, tableIoConfig]);
 
   // Get available x-axis values from actual data
   const availableXValues = useMemo(() => {
-    const values = Array.from(new Set(ioFilteredData.map(d => d[xMetric as keyof typeof d] as number)));
+    const values = Array.from(new Set(chartFilteredData.map(d => d[xMetric as keyof typeof d] as number)));
     return values.sort((a, b) => a - b);
-  }, [ioFilteredData, xMetric]);
+  }, [chartFilteredData, xMetric]);
 
   // Chart data processing for Nivo Line chart
   const chartData = useMemo(() => {
-    // Group data by chip-precision combination (simplified since we filter I/O separately)
-    const groupedData = ioFilteredData.reduce((acc, item) => {
+    // Group data by chip-precision combination
+    const groupedData = chartFilteredData.reduce((acc, item) => {
       const key = `${item.chip} (${item.precision.toUpperCase()})`;
       if (!acc[key]) {
         acc[key] = [];
@@ -157,11 +177,11 @@ export default function Dashboard() {
       id,
       data
     }));
-  }, [ioFilteredData, xMetric, yMetric]);
+  }, [chartFilteredData, xMetric, yMetric]);
 
   // Table data processing
   const tableData = useMemo(() => {
-    const data = [...ioFilteredData];
+    const data = [...tableFilteredData];
 
     // Apply sorting
     data.sort((a, b) => {
@@ -176,7 +196,7 @@ export default function Dashboard() {
     });
 
     return data;
-  }, [ioFilteredData, sortBy, sortDirection]);
+  }, [tableFilteredData, sortBy, sortDirection]);
 
   const updateFilter = (key: keyof FilterState, value: string[]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -217,9 +237,8 @@ export default function Dashboard() {
 
   // Generate chart title based on selected I/O configuration
   const chartTitle = useMemo(() => {
-    if (ioConfig === 'all') return 'All I/O Configurations';
-    return `I/O Configuration: ${ioConfig}`;
-  }, [ioConfig]);
+    return `I/O Configuration: ${chartIoConfig}`;
+  }, [chartIoConfig]);
 
   // Custom colors for better distinction
   const customColors = [
@@ -235,7 +254,7 @@ export default function Dashboard() {
     '#17becf'  // cyan
   ];
 
-  if (loading) {
+  if (loading || discoveryLoading) {
     return (
       <Box sx={{
         display: 'flex',
@@ -278,8 +297,8 @@ export default function Dashboard() {
             onChange={(e) => setSelectedModel(e.target.value)}
             sx={{ fontSize: 12, height: 32 }}
           >
-            {AVAILABLE_MODELS.length > 0 ? (
-              AVAILABLE_MODELS.map((model) => (
+            {discovery && discovery.models.length > 0 ? (
+              discovery.models.map((model) => (
                 <MenuItem key={model} value={model}>
                   {model}
                 </MenuItem>
@@ -394,7 +413,7 @@ export default function Dashboard() {
         <Box sx={{ flexGrow: 1 }} />
 
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: 12 }}>
-          {ioFilteredData.length} of {modelData.length} results
+          {tableFilteredData.length} of {modelData.length} results
         </Typography>
       </Box>
 
@@ -434,11 +453,11 @@ export default function Dashboard() {
               </Typography>
 
               <FormControl size="small" variant="outlined" fullWidth>
-                <InputLabel sx={{ fontSize: 12 }}>X-Axis</InputLabel>
+                <InputLabel sx={{ fontSize: 12 }}>Y-Axis</InputLabel>
                 <Select
-                  value={xMetric}
-                  label="X-Axis"
-                  onChange={(e) => setXMetric(e.target.value)}
+                  value={yMetric}
+                  label="Y-Axis"
+                  onChange={(e) => setYMetric(e.target.value)}
                   sx={{ fontSize: 12, height: 32 }}
                 >
                   {availableMetrics.map((metric) => (
@@ -450,11 +469,11 @@ export default function Dashboard() {
               </FormControl>
 
               <FormControl size="small" variant="outlined" fullWidth>
-                <InputLabel sx={{ fontSize: 12 }}>Y-Axis</InputLabel>
+                <InputLabel sx={{ fontSize: 12 }}>X-Axis</InputLabel>
                 <Select
-                  value={yMetric}
-                  label="Y-Axis"
-                  onChange={(e) => setYMetric(e.target.value)}
+                  value={xMetric}
+                  label="X-Axis"
+                  onChange={(e) => setXMetric(e.target.value)}
                   sx={{ fontSize: 12, height: 32 }}
                 >
                   {availableMetrics.map((metric) => (
@@ -472,12 +491,11 @@ export default function Dashboard() {
               <FormControl size="small" variant="outlined" fullWidth>
                 <InputLabel sx={{ fontSize: 12 }}>Input/Output</InputLabel>
                 <Select
-                  value={ioConfig}
+                  value={chartIoConfig}
                   label="Input/Output"
-                  onChange={(e) => setIoConfig(e.target.value)}
+                  onChange={(e) => setChartIoConfig(e.target.value)}
                   sx={{ fontSize: 12, height: 32 }}
                 >
-                  <MenuItem value="all">All Configurations</MenuItem>
                   {ioOptions.map((config) => (
                     <MenuItem key={config} value={config}>
                       {config}
