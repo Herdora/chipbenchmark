@@ -13,38 +13,51 @@ import {
   Typography,
   Alert,
   Snackbar,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
+import { submitEmailSubscription } from '@/lib/supabase';
 
 export function StayUpdated() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !email.includes('@')) {
+      setErrorMessage('Please enter a valid email address.');
       setShowError(true);
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      // Here you would typically send the subscription to your backend
-      console.log('Subscription submitted:', { email });
+      const result = await submitEmailSubscription(email.trim());
 
-      // Reset form
-      setEmail('');
-
-      setShowSuccess(true);
-      setOpen(false);
+      if (result.success) {
+        // Reset form
+        setEmail('');
+        setShowSuccess(true);
+        setOpen(false);
+      } else {
+        setErrorMessage(result.error || 'Failed to subscribe. Please try again.');
+        setShowError(true);
+      }
     } catch (error) {
       console.error('Error submitting subscription:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
       setShowError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,11 +141,11 @@ export function StayUpdated() {
           <Button
             onClick={handleSubmit}
             variant="contained"
-            disabled={!email}
-            startIcon={<EmailIcon />}
+            disabled={!email || isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : <EmailIcon />}
             sx={{ textTransform: 'none' }}
           >
-            Subscribe
+            {isSubmitting ? 'Subscribing...' : 'Subscribe'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -156,7 +169,7 @@ export function StayUpdated() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert onClose={() => setShowError(false)} severity="error">
-          Please enter a valid email address.
+          {errorMessage}
         </Alert>
       </Snackbar>
     </>

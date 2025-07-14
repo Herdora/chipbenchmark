@@ -7,11 +7,13 @@ import {
   Button,
   Collapse,
   Alert,
-  Snackbar
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SendIcon from '@mui/icons-material/Send';
+import { submitBenchmarkRequest } from '@/lib/supabase';
 
 interface RequestBenchmarkProps {
   // No props needed for simplified version
@@ -22,31 +24,42 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
   const [suggestion, setSuggestion] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!suggestion.trim()) {
+      setErrorMessage('Please enter your benchmark suggestion.');
       setShowError(true);
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      // Here you would typically send the request to your backend
-      console.log('Benchmark request submitted:', { suggestion });
+      const result = await submitBenchmarkRequest(suggestion.trim());
 
-      // Reset form
-      setSuggestion('');
-
-      setShowSuccess(true);
-      setExpanded(false);
+      if (result.success) {
+        // Reset form
+        setSuggestion('');
+        setShowSuccess(true);
+        setExpanded(false);
+      } else {
+        setErrorMessage(result.error || 'Failed to submit request. Please try again.');
+        setShowError(true);
+      }
     } catch (error) {
       console.error('Error submitting request:', error);
+      setErrorMessage('An unexpected error occurred. Please try again.');
       setShowError(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const isFormValid = suggestion.trim().length > 0;
+  const isFormValid = suggestion.trim().length > 0 && !isSubmitting;
 
   return (
     <>
@@ -98,7 +111,7 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
                   variant="contained"
                   size="small"
                   disabled={!isFormValid}
-                  startIcon={<SendIcon />}
+                  startIcon={isSubmitting ? <CircularProgress size={14} color="inherit" /> : <SendIcon />}
                   sx={{
                     fontSize: { xs: 10, md: 12 },
                     textTransform: 'none',
@@ -109,7 +122,7 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
                     }
                   }}
                 >
-                  Submit Request
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </Button>
               </Box>
             </form>
@@ -136,7 +149,7 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert onClose={() => setShowError(false)} severity="error">
-          Please enter your benchmark suggestion.
+          {errorMessage}
         </Alert>
       </Snackbar>
     </>
