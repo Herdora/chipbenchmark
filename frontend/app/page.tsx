@@ -25,6 +25,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
+import { RequestBenchmark } from '@/components/RequestHardware';
 
 interface FilterState {
   chips: string[];
@@ -518,6 +519,8 @@ export default function Dashboard() {
                   ))}
                 </Select>
               </FormControl>
+
+              <RequestBenchmark />
             </Box>
 
             {/* Right side - Chart */}
