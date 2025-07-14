@@ -264,6 +264,22 @@ export default function Dashboard() {
     { value: 'total_token_throughput', label: 'Total Token Throughput' },
   ];
 
+  // Y-axis options (limited set as requested)
+  const yAxisMetrics = [
+    { value: 'tps', label: 'Throughput (TPS)' },
+    { value: 'ttft_ms', label: 'Time to First Token (ms)' },
+    { value: 'request_throughput', label: 'Request Throughput' },
+    { value: 'total_token_throughput', label: 'Total Token Throughput' },
+  ];
+
+  // Ensure Y-axis metric is valid
+  React.useEffect(() => {
+    const validYMetrics = yAxisMetrics.map(m => m.value);
+    if (!validYMetrics.includes(yMetric)) {
+      setYMetric('tps'); // Reset to default if current value is invalid
+    }
+  }, []);
+
   // Generate chart title based on selected I/O configuration
   const chartTitle = useMemo(() => {
     return `I/O Configuration: ${chartIoConfig}`;
@@ -351,13 +367,18 @@ export default function Dashboard() {
             label="Chips"
             onChange={handleMultiSelectChange('chips')}
             input={<OutlinedInput label="Chips" />}
-            renderValue={(selected) =>
-              selected.length === 0
-                ? 'All Chips'
-                : selected.length === filterOptions.chips.length
-                  ? 'All Chips'
-                  : `${selected.length} selected`
-            }
+            renderValue={(selected) => {
+              if (selected.length === 0) {
+                return 'All Chips';
+              }
+              if (selected.length === filterOptions.chips.length) {
+                return 'All Chips';
+              }
+              if (selected.length <= 2) {
+                return selected.join(', ');
+              }
+              return `${selected.slice(0, 2).join(', ')} + ${selected.length - 2} more`;
+            }}
             sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
           >
             {filterOptions.chips.length > 0 ? (
@@ -407,13 +428,18 @@ export default function Dashboard() {
             label="Precisions"
             onChange={handleMultiSelectChange('precisions')}
             input={<OutlinedInput label="Precisions" />}
-            renderValue={(selected) =>
-              selected.length === 0
-                ? 'All Precisions'
-                : selected.length === filterOptions.precisions.length
-                  ? 'All Precisions'
-                  : `${selected.length} selected`
-            }
+            renderValue={(selected) => {
+              if (selected.length === 0) {
+                return 'All Precisions';
+              }
+              if (selected.length === filterOptions.precisions.length) {
+                return 'All Precisions';
+              }
+              if (selected.length <= 2) {
+                return selected.map(p => p.toUpperCase()).join(', ');
+              }
+              return `${selected.slice(0, 2).map(p => p.toUpperCase()).join(', ')} + ${selected.length - 2} more`;
+            }}
             sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
           >
             {filterOptions.precisions.length > 0 ? (
@@ -535,7 +561,7 @@ export default function Dashboard() {
                     onChange={(e) => setYMetric(e.target.value)}
                     sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
                   >
-                    {availableMetrics.map((metric) => (
+                    {yAxisMetrics.map((metric) => (
                       <MenuItem key={metric.value} value={metric.value}>
                         {metric.label}
                       </MenuItem>
