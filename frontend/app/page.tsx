@@ -20,7 +20,6 @@ import {
   TableRow,
   Paper,
   TableSortLabel,
-  Chip,
   OutlinedInput,
   SelectChangeEvent,
   CircularProgress,
@@ -80,8 +79,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState(0);
 
   // Table tab state
-  const [sortBy, setSortBy] = useState('timestamp');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState('concurrency');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Chart axis selectors
   const [xMetric, setXMetric] = useState('concurrency');
@@ -217,14 +216,16 @@ export default function Dashboard() {
 
   const handleMultiSelectChange = (key: keyof FilterState) => (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
-    updateFilter(key, value);
+
+    // Handle "All" selection
+    if (value.includes('')) {
+      updateFilter(key, []);
+    } else {
+      updateFilter(key, value);
+    }
   };
 
-  const handleChipDelete = (filterKey: keyof FilterState, valueToDelete: string) => (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    updateFilter(filterKey, filters[filterKey].filter(v => v !== valueToDelete));
-  };
+
 
   const availableMetrics = [
     { value: 'concurrency', label: 'Concurrency' },
@@ -320,39 +321,46 @@ export default function Dashboard() {
             label="Chips"
             onChange={handleMultiSelectChange('chips')}
             input={<OutlinedInput label="Chips" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip
-                    key={value}
-                    label={value}
-                    size="small"
-                    onDelete={handleChipDelete('chips', value)}
-                    sx={{
-                      fontSize: 10,
-                      height: 20,
-                      bgcolor: '#1976d2',
-                      color: 'white',
-                      '& .MuiChip-deleteIcon': {
-                        color: 'white',
-                        fontSize: 14,
-                        '&:hover': {
-                          color: '#f0f0f0'
-                        }
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-            )}
+            renderValue={(selected) =>
+              selected.length === 0
+                ? 'All Chips'
+                : selected.length === filterOptions.chips.length
+                  ? 'All Chips'
+                  : `${selected.length} selected`
+            }
             sx={{ fontSize: 12, minHeight: 32 }}
           >
             {filterOptions.chips.length > 0 ? (
-              filterOptions.chips.map((chip) => (
-                <MenuItem key={chip} value={chip}>
-                  {chip}
-                </MenuItem>
-              ))
+              [
+                <MenuItem
+                  key="all"
+                  value=""
+                  sx={{ fontSize: 12, fontWeight: 'bold' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <input
+                      type="checkbox"
+                      checked={filters.chips.length === 0}
+                      readOnly
+                      style={{ marginRight: 8 }}
+                    />
+                    All
+                  </Box>
+                </MenuItem>,
+                ...filterOptions.chips.map((chip) => (
+                  <MenuItem key={chip} value={chip} sx={{ fontSize: 12 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <input
+                        type="checkbox"
+                        checked={filters.chips.includes(chip)}
+                        readOnly
+                        style={{ marginRight: 8 }}
+                      />
+                      {chip}
+                    </Box>
+                  </MenuItem>
+                ))
+              ]
             ) : (
               <MenuItem value="" disabled>
                 No chips available
@@ -369,39 +377,46 @@ export default function Dashboard() {
             label="Precisions"
             onChange={handleMultiSelectChange('precisions')}
             input={<OutlinedInput label="Precisions" />}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip
-                    key={value}
-                    label={value.toUpperCase()}
-                    size="small"
-                    onDelete={handleChipDelete('precisions', value)}
-                    sx={{
-                      fontSize: 10,
-                      height: 20,
-                      bgcolor: '#1976d2',
-                      color: 'white',
-                      '& .MuiChip-deleteIcon': {
-                        color: 'white',
-                        fontSize: 14,
-                        '&:hover': {
-                          color: '#f0f0f0'
-                        }
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-            )}
+            renderValue={(selected) =>
+              selected.length === 0
+                ? 'All Precisions'
+                : selected.length === filterOptions.precisions.length
+                  ? 'All Precisions'
+                  : `${selected.length} selected`
+            }
             sx={{ fontSize: 12, minHeight: 32 }}
           >
             {filterOptions.precisions.length > 0 ? (
-              filterOptions.precisions.map((precision) => (
-                <MenuItem key={precision} value={precision}>
-                  {precision.toUpperCase()}
-                </MenuItem>
-              ))
+              [
+                <MenuItem
+                  key="all"
+                  value=""
+                  sx={{ fontSize: 12, fontWeight: 'bold' }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <input
+                      type="checkbox"
+                      checked={filters.precisions.length === 0}
+                      readOnly
+                      style={{ marginRight: 8 }}
+                    />
+                    All
+                  </Box>
+                </MenuItem>,
+                ...filterOptions.precisions.map((precision) => (
+                  <MenuItem key={precision} value={precision} sx={{ fontSize: 12 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <input
+                        type="checkbox"
+                        checked={filters.precisions.includes(precision)}
+                        readOnly
+                        style={{ marginRight: 8 }}
+                      />
+                      {precision.toUpperCase()}
+                    </Box>
+                  </MenuItem>
+                ))
+              ]
             ) : (
               <MenuItem value="" disabled>
                 No precisions available
@@ -609,12 +624,12 @@ export default function Dashboard() {
                           minWidth: '200px',
                           whiteSpace: 'nowrap'
                         }}>
-                          <strong>{props.point.serieId}</strong><br />
+                          <strong>{props.point.data.chip} ({props.point.data.precision.toUpperCase()})</strong><br />
                           {selectedModel}<br />
                           I/O: {props.point.data.input_sequence_length}/{props.point.data.output_sequence_length}<br />
                           Concurrency: {props.point.data.concurrency}<br />
-                          {getMetricLabel(xMetric)}: {props.point.data.x}<br />
-                          {getMetricLabel(yMetric)}: {props.point.data.y}
+                          {getMetricLabel(yMetric)}: {props.point.data.y}<br />
+                          {getMetricLabel(xMetric)}: {props.point.data.x}
                         </div>
                       )}
                     />
@@ -632,16 +647,6 @@ export default function Dashboard() {
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'timestamp'}
-                        direction={sortBy === 'timestamp' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('timestamp')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Timestamp
-                      </TableSortLabel>
-                    </TableCell>
                     <TableCell>
                       <TableSortLabel
                         active={sortBy === 'chip'}
@@ -727,9 +732,6 @@ export default function Dashboard() {
                 <TableBody>
                   {tableData.map((row, index) => (
                     <TableRow key={index} hover>
-                      <TableCell sx={{ fontSize: 11 }}>
-                        {new Date(row.timestamp).toLocaleString()}
-                      </TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.chip}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.precision.toUpperCase()}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.input_sequence_length}</TableCell>
