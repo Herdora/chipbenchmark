@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Tooltip from '@mui/material/Tooltip';
 import Image from 'next/image';
+import { Analytics } from '@vercel/analytics/next';
 import { theme } from '@/lib/theme';
 import { StayUpdated } from '@/components/StayUpdated';
 import logo from './logo.png';
@@ -162,6 +163,7 @@ export default function RootLayout({
               {children}
             </Box>
           </Box>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
