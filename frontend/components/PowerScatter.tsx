@@ -25,22 +25,25 @@ export function PowerScatter({ data }: PowerScatterProps) {
     const groupedData = new Map<string, Array<{ x: number; y: number; chip: string; model: string; precision: string; }>>();
 
     data.forEach(result => {
-      if (!groupedData.has(result.chip)) {
-        groupedData.set(result.chip, []);
+      if (result.power_w_avg !== undefined) {
+        if (!groupedData.has(result.chip)) {
+          groupedData.set(result.chip, []);
+        }
+        groupedData.get(result.chip)!.push({
+          x: result.power_w_avg,
+          y: result.tps,
+          chip: result.chip,
+          model: result.model,
+          precision: result.precision
+        });
       }
-      groupedData.get(result.chip)!.push({
-        x: result.power_w_avg,
-        y: result.tps,
-        chip: result.chip,
-        model: result.model,
-        precision: result.precision
-      });
     });
 
     // Calculate efficiency iso-lines (TPS = efficiency * power)
-    const maxPower = Math.max(...data.map(d => d.power_w_avg));
-    const minEfficiency = Math.min(...data.map(d => d.tps / d.power_w_avg));
-    const maxEfficiency = Math.max(...data.map(d => d.tps / d.power_w_avg));
+    const powerValues = data.map(d => d.power_w_avg).filter(p => p !== undefined) as number[];
+    const maxPower = Math.max(...powerValues);
+    const minEfficiency = Math.min(...data.filter(d => d.power_w_avg !== undefined).map(d => d.tps / d.power_w_avg!));
+    const maxEfficiency = Math.max(...data.filter(d => d.power_w_avg !== undefined).map(d => d.tps / d.power_w_avg!));
 
     // Create efficiency reference lines
     const efficiencyValues = [

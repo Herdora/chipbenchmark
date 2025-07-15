@@ -35,7 +35,7 @@ export function LatencyCurve({ data }: LatencyCurveProps) {
     const chartPoints = Array.from(groupedData.entries())
       .sort(([a], [b]) => a - b)
       .map(([concurrency, chipData]) => {
-        const point: any = { concurrency };
+        const point: { concurrency: number;[key: string]: number; } = { concurrency };
 
         chipData.forEach((result, chip) => {
           point[chip] = result.ttft_ms;

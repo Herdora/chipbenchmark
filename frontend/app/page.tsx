@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery, AVAILABLE_MODELS } from '@/hooks/useBenchmarkData';
+import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
 import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
 import {
@@ -57,7 +57,17 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function ChartTooltip({ point, selectedModel, xMetric, yMetric }: {
-  point: any;
+  point: {
+    data: {
+      chip: string;
+      precision: string;
+      concurrency: number;
+      input_sequence_length: number;
+      output_sequence_length: number;
+      x: number;
+      y: number;
+    };
+  };
   selectedModel: string;
   xMetric: string;
   yMetric: string;
@@ -136,7 +146,7 @@ export default function Dashboard() {
 
   // I/O sequence length selectors - separate for chart and table
   const [chartIoConfig, setChartIoConfig] = useState<string>('200/200');
-  const [tableIoConfig, setTableIoConfig] = useState<string>('all');
+  const tableIoConfig: 'all' | string = 'all'; // Fixed value since setter was unused
 
   // Get filter options from current model data with fallback
   const filterOptions = useFilterOptions(modelData);
@@ -173,11 +183,16 @@ export default function Dashboard() {
   const tableFilteredData = useMemo(() => {
     if (tableIoConfig === 'all') return filteredData;
 
-    const [inputLength, outputLength] = tableIoConfig.split('/').map(Number);
-    return filteredData.filter(item =>
-      item.input_sequence_length === inputLength &&
-      item.output_sequence_length === outputLength
-    );
+    // This code path is never reached since tableIoConfig is always 'all'
+    // But keeping for potential future use
+    if (tableIoConfig.includes('/')) {
+      const [inputLength, outputLength] = tableIoConfig.split('/').map(Number);
+      return filteredData.filter(item =>
+        item.input_sequence_length === inputLength &&
+        item.output_sequence_length === outputLength
+      );
+    }
+    return filteredData;
   }, [filteredData, tableIoConfig]);
 
   // Get available x-axis values from actual data
@@ -304,12 +319,12 @@ export default function Dashboard() {
   ];
 
   // Y-axis options (limited set as requested)
-  const yAxisMetrics = [
+  const yAxisMetrics = useMemo(() => [
     { value: 'tps', label: 'Throughput (TPS)' },
     { value: 'ttft_ms', label: 'Time to First Token (ms)' },
     { value: 'request_throughput', label: 'Request Throughput' },
     { value: 'total_token_throughput', label: 'Total Token Throughput' },
-  ];
+  ], []);
 
   // Ensure Y-axis metric is valid
   React.useEffect(() => {
@@ -317,7 +332,7 @@ export default function Dashboard() {
     if (!validYMetrics.includes(yMetric)) {
       setYMetric('tps'); // Reset to default if current value is invalid
     }
-  }, []);
+  }, [yAxisMetrics, yMetric]);
 
   // Generate chart title based on selected I/O configuration
   const chartTitle = useMemo(() => {

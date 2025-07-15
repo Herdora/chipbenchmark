@@ -2,7 +2,7 @@
 
 import { useBenchmarkKPIs } from '@/hooks/useBenchmarkData';
 import type { BenchmarkResult } from '@/lib/schemas/benchmark';
-import { Card, CardContent, Grid, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 import { TrendingUp, Speed, Battery6Bar, EmojiNature } from '@mui/icons-material';
 
 interface KpiTilesProps {
@@ -65,47 +65,44 @@ export function KpiTiles({ data }: KpiTilesProps) {
   const kpis = useBenchmarkKPIs(data);
 
   return (
-    <Grid container spacing={3} sx={{ mb: 4 }}>
-      <Grid item xs={12} sm={6} md={3}>
-        <KpiTile
-          title="Best TTFT"
-          value={kpis.ttft.min}
-          unit="ms"
-          subtitle={`Median: ${kpis.ttft.median.toFixed(1)}ms`}
-          icon={<Speed />}
-          color="#7DE3F3"
-        />
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <KpiTile
-          title="Peak TPS"
-          value={kpis.tps.max}
-          unit="tok/s"
-          subtitle={`Median: ${kpis.tps.median.toFixed(0)} tok/s`}
-          icon={<TrendingUp />}
-          color="#3B82F6"
-        />
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <KpiTile
-          title="Min Power"
-          value={kpis.power.min}
-          unit="W"
-          subtitle={`Median: ${kpis.power.median.toFixed(0)}W`}
-          icon={<Battery6Bar />}
-          color="#F59E0B"
-        />
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <KpiTile
-          title="Best Efficiency"
-          value={kpis.efficiency.max}
-          unit="tok/W"
-          subtitle={`Median: ${kpis.efficiency.median.toFixed(2)} tok/W`}
-          icon={<EmojiNature />}
-          color="#22C55E"
-        />
-      </Grid>
-    </Grid>
+    <Box sx={{
+      display: 'grid',
+      gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
+      gap: 3,
+      mb: 4
+    }}>
+      <KpiTile
+        title="Avg TTFT"
+        value={kpis.avgLatency}
+        unit="ms"
+        subtitle={`Average latency`}
+        icon={<Speed />}
+        color="#7DE3F3"
+      />
+      <KpiTile
+        title="Avg TPS"
+        value={kpis.avgThroughput}
+        unit="tok/s"
+        subtitle={`Average throughput`}
+        icon={<TrendingUp />}
+        color="#3B82F6"
+      />
+      <KpiTile
+        title="Total Requests"
+        value={kpis.totalRequests}
+        unit=""
+        subtitle={`Successful requests`}
+        icon={<Battery6Bar />}
+        color="#F59E0B"
+      />
+      <KpiTile
+        title="Avg Power"
+        value={kpis.avgPower}
+        unit="W"
+        subtitle={`Average power consumption`}
+        icon={<EmojiNature />}
+        color="#22C55E"
+      />
+    </Box>
   );
 } 

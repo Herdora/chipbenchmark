@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { BenchmarkResult } from '@/lib/schemas/benchmark';
-import { Card, CardContent, Typography, FormControl, InputLabel, Select, MenuItem, Box, Grid } from '@mui/material';
+import { Card, CardContent, Typography, FormControl, InputLabel, Select, MenuItem, Box } from '@mui/material';
 
 interface InteractiveChartsProps {
   data: BenchmarkResult[];
@@ -25,12 +25,12 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
   }, [data]);
 
   // Pick a default concurrency that has data
-  const getFirstConcurrencyWithData = () => {
+  const getFirstConcurrencyWithData = useCallback(() => {
     for (const c of concurrencyOptions) {
       if (data.some(d => d.concurrency === c)) return c;
     }
     return concurrencyOptions[0] ?? 1;
-  };
+  }, [concurrencyOptions, data]);
 
   const [concurrency, setConcurrency] = useState(getFirstConcurrencyWithData());
 
@@ -39,7 +39,7 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
     if (!concurrencyOptions.includes(concurrency)) {
       setConcurrency(getFirstConcurrencyWithData());
     }
-  }, [concurrencyOptions, concurrency, data]);
+  }, [concurrencyOptions, concurrency, data, getFirstConcurrencyWithData]);
 
   // Filter data by concurrency
   const filtered = useMemo(() => data.filter(d => d.concurrency === concurrency), [data, concurrency]);
@@ -56,15 +56,15 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
     return map;
   }, [filtered]);
 
-  // Prepare chart data for output_length
+  // Prepare chart data for output_sequence_length
   const chartData = useMemo(() => {
-    // For each group, sort by output_length
-    const result: Record<string, { output_length: number; tps: number; ttft_ms: number; }[]> = {};
+    // For each group, sort by output_sequence_length
+    const result: Record<string, { output_sequence_length: number; tps: number; ttft_ms: number; }[]> = {};
     grouped.forEach((arr, key) => {
       result[key] = arr
         .slice()
-        .sort((a, b) => a.output_length - b.output_length)
-        .map(d => ({ output_length: d.output_length, tps: d.tps, ttft_ms: d.ttft_ms }));
+        .sort((a, b) => a.output_sequence_length - b.output_sequence_length)
+        .map(d => ({ output_sequence_length: d.output_sequence_length, tps: d.tps, ttft_ms: d.ttft_ms }));
     });
     return result;
   }, [grouped]);
@@ -93,9 +93,9 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
         </Box>
 
         {hasChartData ? (
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, gap: 3 }}>
             {/* TPS vs Output Length */}
-            <Grid item xs={12} lg={6}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                 Throughput (tokens/sec) vs Output Length
               </Typography>
@@ -104,7 +104,7 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
                   <LineChart>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5EAF0" />
                     <XAxis
-                      dataKey="output_length"
+                      dataKey="output_sequence_length"
                       type="number"
                       label={{ value: 'Output Length (tokens)', position: 'insideBottom', offset: -5 }}
                       style={{ fontSize: 12 }}
@@ -140,10 +140,10 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
                   </LineChart>
                 </ResponsiveContainer>
               </Box>
-            </Grid>
+            </Box>
 
             {/* TTFT vs Output Length */}
-            <Grid item xs={12} lg={6}>
+            <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                 TTFT vs Output Length
               </Typography>
@@ -152,7 +152,7 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
                   <LineChart>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5EAF0" />
                     <XAxis
-                      dataKey="output_length"
+                      dataKey="output_sequence_length"
                       type="number"
                       label={{ value: 'Output Length (tokens)', position: 'insideBottom', offset: -5 }}
                       style={{ fontSize: 12 }}
@@ -188,8 +188,8 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
                   </LineChart>
                 </ResponsiveContainer>
               </Box>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         ) : (
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <Typography variant="body1" color="text.secondary">

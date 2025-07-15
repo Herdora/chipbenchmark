@@ -42,12 +42,12 @@ const exportToCSV = (data: BenchmarkResult[]) => {
     result.model,
     result.chip,
     result.precision,
-    result.batch_size.toString(),
+    result.concurrency.toString(), // Use concurrency instead of batch_size
     result.concurrency.toString(),
     result.ttft_ms.toFixed(1),
     result.tps.toFixed(1),
-    result.power_w_avg.toFixed(1),
-    (result.tps / result.power_w_avg).toFixed(2),
+    result.power_w_avg?.toFixed(1) || 'N/A',
+    result.power_w_avg ? (result.tps / result.power_w_avg).toFixed(2) : 'N/A',
     result.timestamp
   ]);
 
@@ -146,13 +146,13 @@ export function RunsTable({ data }: RunsTableProps) {
                       color={getPrecisionColor(result.precision)}
                     />
                   </TableCell>
-                  <TableCell align="right">{result.batch_size}</TableCell>
+                  <TableCell align="right">{result.concurrency}</TableCell>
                   <TableCell align="right">{result.concurrency}</TableCell>
                   <TableCell align="right">{result.ttft_ms.toFixed(1)}</TableCell>
                   <TableCell align="right">{result.tps.toFixed(0)}</TableCell>
-                  <TableCell align="right">{result.power_w_avg.toFixed(1)}</TableCell>
+                  <TableCell align="right">{result.power_w_avg?.toFixed(1) || 'N/A'}</TableCell>
                   <TableCell align="right">
-                    {(result.tps / result.power_w_avg).toFixed(2)} tok/W
+                    {result.power_w_avg ? (result.tps / result.power_w_avg).toFixed(2) : 'N/A'} tok/W
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">

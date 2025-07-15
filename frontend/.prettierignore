@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env*
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Cache and logs
+.cache/
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated files
+*.d.ts
+!src/**/*.d.ts
+
+# Public assets (don't format)
+public/ 

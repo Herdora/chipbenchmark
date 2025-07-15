@@ -17,6 +17,7 @@ import { submitBenchmarkRequest } from '@/lib/supabase';
 
 interface RequestBenchmarkProps {
   // No props needed for simplified version
+  readonly placeholder?: never;
 }
 
 export function RequestBenchmark({}: RequestBenchmarkProps) {

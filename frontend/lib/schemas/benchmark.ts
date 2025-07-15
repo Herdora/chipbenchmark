@@ -6,9 +6,9 @@ import { z } from 'zod';
 
 // Available models, chips, and precisions are now loaded dynamically
 // These will be populated from the API
-export let AVAILABLE_MODELS: string[] = [];
-export let AVAILABLE_CHIPS: string[] = [];
-export let AVAILABLE_PRECISIONS: string[] = [];
+export const AVAILABLE_MODELS: string[] = [];
+export const AVAILABLE_CHIPS: string[] = [];
+export const AVAILABLE_PRECISIONS: string[] = [];
 
 // Common concurrency values used in benchmarks
 export const COMMON_CONCURRENCY_VALUES = [1, 5, 100, 200] as const;
