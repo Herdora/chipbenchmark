@@ -1,15 +1,17 @@
-# Llama-3-70B-Instruct A100 FP8 Benchmark
+# Qwen2-7B A100 BF16 Benchmark
 
 ## Model Attribution
 
-This benchmark uses the **Meta Llama 3 70B Instruct FP8** model.
+This benchmark uses the **Meta Qwen 2 7B BF16** model.
 
-- **Model**: [RedHatAI/Meta-Llama-3-70B-Instruct-FP8](https://huggingface.co/RedHatAI/Meta-Llama-3-70B-Instruct-FP8)
-- **License**: [Llama 3 Community License](https://ai.meta.com/llama/license/)
+- **Model**: [meta-llama/Qwen2-7B](https://huggingface.co/meta-llama/Qwen2-7B)
+- **Release Date**: July 15, 2025
+- **License**: [Qwen Community License](https://github.com/QwenLM/Qwen/blob/main/LICENSE)
+- **Parameters**: 7B
 
 ## Quick Start
 
-**Note: Run these commands from the FP8 directory**
+**Note: Run these commands from the BF16 directory**
 
 ### If Need to Add User to Docker Group
 ```bash
