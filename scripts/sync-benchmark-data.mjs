@@ -75,13 +75,28 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
                 if (pathParts.length >= 3) {
                     const [model, chip, precision] = pathParts;
 
+                    // Check for hardware.json in the same directory
+                    const hardwareJsonPath = path.join(path.dirname(fullItemPath), 'hardware.json');
+                    let hardwareData = null;
+                    
+                    if (fs.existsSync(hardwareJsonPath)) {
+                        try {
+                            const hardwareJsonString = fs.readFileSync(hardwareJsonPath, 'utf8');
+                            hardwareData = safeJsonParse(hardwareJsonString, hardwareJsonPath);
+                        } catch (error) {
+                            console.error(`✗ Error loading hardware.json ${hardwareJsonPath}:`, error.message);
+                        }
+                    }
+
                     results.push({
                         model,
                         chip,
                         precision,
                         path: relativePath,
                         data: data,
-                        sourcePath: fullItemPath
+                        hardwareData: hardwareData,
+                        sourcePath: fullItemPath,
+                        hardwareSourcePath: hardwareData ? hardwareJsonPath : null
                     });
 
                     console.log(`✓ Found benchmark: ${model}/${chip}/${precision} (${data.length} data points)`);
@@ -97,7 +112,7 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
 
 // Function to copy benchmark data to frontend structure
 function copyBenchmarkData(benchmarkInfo) {
-    const { model, chip, precision, data, sourcePath } = benchmarkInfo;
+    const { model, chip, precision, data, hardwareData, sourcePath, hardwareSourcePath } = benchmarkInfo;
 
     // Create target directory structure
     const targetDir = path.join(frontendBenchmarksDir, model, chip, precision);
@@ -111,12 +126,20 @@ function copyBenchmarkData(benchmarkInfo) {
 
     console.log(`✓ Copied: ${model}/${chip}/${precision}/data.json`);
 
+    // Copy hardware.json file if it exists
+    if (hardwareData && hardwareSourcePath) {
+        const hardwareTargetPath = path.join(targetDir, 'hardware.json');
+        fs.writeFileSync(hardwareTargetPath, JSON.stringify(hardwareData, null, 2));
+        console.log(`✓ Copied: ${model}/${chip}/${precision}/hardware.json`);
+    }
+
     return {
         model,
         chip,
         precision,
         dataPoints: data.length,
-        targetPath
+        targetPath,
+        hasHardwareData: hardwareData !== null
     };
 }
 
@@ -129,7 +152,8 @@ function createIndexFile(copiedBenchmarks) {
             chip: b.chip,
             precision: b.precision,
             dataPoints: b.dataPoints,
-            path: `benchmarks/${b.model}/${b.chip}/${b.precision}/data.json`
+            path: `benchmarks/${b.model}/${b.chip}/${b.precision}/data.json`,
+            hasHardwareData: b.hasHardwareData
         }))
     };
 
@@ -172,7 +196,11 @@ function syncBenchmarkData() {
 
     // Summary
     const totalDataPoints = copiedBenchmarks.reduce((sum, b) => sum + b.dataPoints, 0);
+    const hardwareFiles = copiedBenchmarks.filter(b => b.hasHardwareData).length;
     console.log(`✅ Sync complete! Copied ${copiedBenchmarks.length} benchmarks with ${totalDataPoints} total data points`);
+    if (hardwareFiles > 0) {
+        console.log(`📋 Also copied ${hardwareFiles} hardware.json files`);
+    }
 }
 
 // Run the sync

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery, AVAILABLE_MODELS } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
+import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
 import {
   Box,
   FormControl,
@@ -51,6 +52,44 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && <Box sx={{ height: '100%', overflow: 'hidden' }}>{children}</Box>}
+    </div>
+  );
+}
+
+function ChartTooltip({ point, selectedModel, xMetric, yMetric }: {
+  point: any;
+  selectedModel: string;
+  xMetric: string;
+  yMetric: string;
+}) {
+  const [hardwareInfo, setHardwareInfo] = React.useState<string>('');
+
+  React.useEffect(() => {
+    const loadHardwareInfo = async () => {
+      const hardware = await fetchHardwareInfo(selectedModel, point.data.chip, point.data.precision);
+      setHardwareInfo(formatHardwareInfo(hardware));
+    };
+    loadHardwareInfo();
+  }, [selectedModel, point.data.chip, point.data.precision]);
+
+  return (
+    <div style={{
+      background: 'white',
+      padding: '12px 16px',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      fontSize: '12px',
+      minWidth: '200px',
+      whiteSpace: 'nowrap'
+    }}>
+      <strong>{point.data.chip} ({point.data.precision.toUpperCase()})</strong><br />
+      {hardwareInfo && <span style={{ color: '#666' }}>{hardwareInfo}</span>}
+      {hardwareInfo && <br />}
+      {selectedModel}<br />
+      I/O: {point.data.input_sequence_length}/{point.data.output_sequence_length}<br />
+      Concurrency: {point.data.concurrency}<br />
+      {getMetricLabel(yMetric)}: {point.data.y}<br />
+      {getMetricLabel(xMetric)}: {point.data.x}
     </div>
   );
 }
@@ -321,6 +360,7 @@ export default function Dashboard() {
       flexDirection: 'column',
       height: '100%',
       width: '100%',
+      maxWidth: '100vw',
       overflow: 'hidden',
       minWidth: 0 // Prevent flex items from overflowing
     }}>
@@ -333,10 +373,11 @@ export default function Dashboard() {
         borderColor: 'divider',
         alignItems: 'center',
         flexWrap: 'wrap',
-        overflow: 'auto'
+        overflow: 'hidden',
+        minWidth: 0
       }}>
         {/* Primary Model Selector */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 200 } }}>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 140, md: 180 }, maxWidth: { xs: 180, md: 220 } }}>
           <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Model</InputLabel>
           <Select
             value={selectedModel}
@@ -359,7 +400,7 @@ export default function Dashboard() {
         </FormControl>
 
         {/* Secondary Filters */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 100, md: 150 } }}>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 80, md: 120 }, maxWidth: { xs: 140, md: 160 } }}>
           <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Chips</InputLabel>
           <Select
             multiple
@@ -420,7 +461,7 @@ export default function Dashboard() {
           </Select>
         </FormControl>
 
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 100, md: 150 } }}>
+        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 80, md: 120 }, maxWidth: { xs: 140, md: 160 } }}>
           <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Precisions</InputLabel>
           <Select
             multiple
@@ -481,11 +522,13 @@ export default function Dashboard() {
           </Select>
         </FormControl>
 
-        <Box sx={{ flexGrow: 1 }} />
+        <Box sx={{ flexGrow: 1, minWidth: { xs: 8, md: 16 } }} />
 
         <Typography variant="body2" color="text.secondary" sx={{
           fontSize: { xs: 10, md: 12 },
-          whiteSpace: 'nowrap'
+          flexShrink: 1,
+          textAlign: 'right',
+          lineHeight: 1.2
         }}>
           {activeTab === 0
             ? `${tableFilteredData.length} of ${modelData.length} results`
@@ -720,23 +763,13 @@ export default function Dashboard() {
                           ]
                         }
                       ]}
-                      tooltip={(props: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                        <div style={{
-                          background: 'white',
-                          padding: '12px 16px',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          minWidth: '200px',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          <strong>{props.point.data.chip} ({props.point.data.precision.toUpperCase()})</strong><br />
-                          {selectedModel}<br />
-                          I/O: {props.point.data.input_sequence_length}/{props.point.data.output_sequence_length}<br />
-                          Concurrency: {props.point.data.concurrency}<br />
-                          {getMetricLabel(yMetric)}: {props.point.data.y}<br />
-                          {getMetricLabel(xMetric)}: {props.point.data.x}
-                        </div>
+                      tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+                        <ChartTooltip
+                          point={point}
+                          selectedModel={selectedModel}
+                          xMetric={xMetric}
+                          yMetric={yMetric}
+                        />
                       )}
                     />
                   </Box>

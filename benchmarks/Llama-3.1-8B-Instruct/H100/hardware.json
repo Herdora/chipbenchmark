@@ -2,4 +2,3 @@
     "gpu": "H100",
     "type": "SXM5",
     "memory": "80GB"
-}
