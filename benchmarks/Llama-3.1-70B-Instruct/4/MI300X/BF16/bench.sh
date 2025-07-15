@@ -1,6 +1,6 @@
 set -euo pipefail
 
-MODEL_NAME="meta-llama/Llama-4-Scout-17B-16E"
+MODEL_NAME="meta-llama/Llama-3.1-70B-Instruct"
 MODEL=${1:-$MODEL_NAME}
 PORT="${PORT:-8004}"
 SERVER_URL="http://localhost:$PORT"
@@ -45,7 +45,7 @@ parse_vllm_output() {
     cat <<EOF
 {
   "timestamp": "$(date -Iseconds)",
-  "config": "Llama-4-Scout-17B-16E",
+  "config": "Llama-3.1-70B-Instruct",
   "model": "$MODEL",
   "input_sequence_length": $isl,
   "output_sequence_length": $osl,
@@ -71,7 +71,7 @@ echo "[" > "$JSONFILE"
 first_entry=true
 
 {
-  echo "=== Llama-4-Scout-17B-16E Benchmark started $(date) ==="
+  echo "=== Llama-3.1-70B-Instruct Benchmark started $(date) ==="
   echo "Model: $MODEL"
   echo "Server URL: $SERVER_URL"
   echo "Concurrency levels: ${CONCURRENCY_LEVELS[*]}"

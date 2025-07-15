@@ -1,10 +1,10 @@
 set -euo pipefail
 
-MODEL="Qwen/Qwen3-14B"
-TENSOR_PARALLEL_SIZE=1
+MODEL="meta-llama/Llama-3.1-70B-Instruct"
+TENSOR_PARALLEL_SIZE=4
 DTYPE="bfloat16"
-PORT="${PORT:-8001}"
-GPU_ID="${GPU_ID:-1}"
+PORT="${PORT:-8004}"
+GPU_ID="${GPU_ID:-0,1,4,5}"
 
 export CUDA_VISIBLE_DEVICES=$GPU_ID
 export HSA_VISIBLE_DEVICES=$GPU_ID

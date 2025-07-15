@@ -7,6 +7,7 @@ PORT="${PORT:-8002}"
 GPU_ID="${GPU_ID:-2,3}"
 
 export CUDA_VISIBLE_DEVICES=$GPU_ID
+export HSA_VISIBLE_DEVICES=$GPU_ID
 export VLLM_USE_V1=1
 
 echo ">>> Starting vLLM server on GPU $GPU_ID (port $PORT) for model $MODEL"
