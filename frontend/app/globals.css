@@ -5,12 +5,27 @@
   box-sizing: border-box;
 }
 
-/* Ensure full height for the app */
+/* Ensure full height for the app with mobile support */
 html,
 body,
 #__next {
   height: 100%;
   overflow: hidden;
+}
+
+/* Mobile-specific viewport handling */
+html {
+  /* Support for notched devices */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+body {
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior: none;
+  /* Prevent text size adjust on mobile orientation change */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Flat UI specific styles */
@@ -31,4 +46,27 @@ input:focus-visible,
 select:focus-visible {
   outline: 2px solid #3B4656;
   outline-offset: 2px;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+
+  /* Fix for mobile Chrome bottom toolbar */
+  body {
+    height: 100dvh;
+    height: 100vh;
+    /* Fallback for older browsers */
+  }
+
+  /* Ensure proper touch scrolling on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent zoom on input focus on iOS */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }

@@ -22,7 +22,6 @@ export const CHART_METRICS = {
   tps: 'Throughput (TPS)',
   ttft_ms: 'Time to First Token (ms)',
   successful_requests: 'Successful Requests',
-  request_throughput: 'Request Throughput',
   total_token_throughput: 'Total Token Throughput',
   power_w_avg: 'Power (W)',
 } as const;

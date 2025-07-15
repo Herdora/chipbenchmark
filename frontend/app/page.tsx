@@ -206,12 +206,22 @@ export default function Dashboard() {
     // Group data by chip-precision combination
     const groupedData = chartFilteredData.reduce((acc, item) => {
       const key = `${item.chip} (${item.precision.toUpperCase()})`;
+      
+      // Get x and y values with proper validation
+      const xValue = item[xMetric as keyof typeof item] as number;
+      const yValue = item[yMetric as keyof typeof item] as number;
+      
+      // Skip data points with invalid values
+      if (xValue == null || yValue == null || isNaN(xValue) || isNaN(yValue)) {
+        return acc;
+      }
+      
       if (!acc[key]) {
         acc[key] = [];
       }
       acc[key].push({
-        x: item[xMetric as keyof typeof item] as number,
-        y: item[yMetric as keyof typeof item] as number,
+        x: xValue,
+        y: yValue,
         chip: item.chip,
         precision: item.precision,
         concurrency: item.concurrency,
@@ -234,11 +244,13 @@ export default function Dashboard() {
       groupedData[key].sort((a, b) => a.x - b.x);
     });
 
-    // Convert to Nivo format
-    return Object.entries(groupedData).map(([id, data]) => ({
-      id,
-      data
-    }));
+    // Convert to Nivo format - only include groups with data
+    return Object.entries(groupedData)
+      .filter(([, data]) => data.length > 0)
+      .map(([id, data]) => ({
+        id,
+        data
+      }));
   }, [chartFilteredData, xMetric, yMetric]);
 
   // Table data processing
@@ -317,7 +329,6 @@ export default function Dashboard() {
   const yAxisMetrics = useMemo(() => [
     { value: 'tps', label: 'Throughput (TPS)' },
     { value: 'ttft_ms', label: 'Time to First Token (ms)' },
-    { value: 'request_throughput', label: 'Request Throughput' },
     { value: 'total_token_throughput', label: 'Total Token Throughput' },
   ], []);
 
@@ -354,7 +365,7 @@ export default function Dashboard() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        height: '100%',
         flexDirection: 'column',
         gap: 2
       }}>
