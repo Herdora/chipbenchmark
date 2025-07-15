@@ -2,6 +2,9 @@
 
 A platform for visualizing chip benchmark results.
 
+![Chip Benchmark Banner](assets/banner.png)
+
+
 ## Quick Start
 
 ```bash
