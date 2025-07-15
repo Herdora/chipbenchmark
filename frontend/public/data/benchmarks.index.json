@@ -1,0 +1,37 @@
+{
+  "lastUpdated": "2025-07-15T01:20:30.505Z",
+  "benchmarks": [
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "chip": "L40S",
+      "precision": "BF16",
+      "dataPoints": 19,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/L40S/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "chip": "MI300X",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    }
+  ]
+}

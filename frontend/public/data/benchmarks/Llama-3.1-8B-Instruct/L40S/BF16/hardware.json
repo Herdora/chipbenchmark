@@ -1,0 +1,5 @@
+{
+  "gpu": "L40S",
+  "type": "PCIe",
+  "memory": "48GB"
+}

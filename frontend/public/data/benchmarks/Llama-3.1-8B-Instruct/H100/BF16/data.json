@@ -1,0 +1,742 @@
+[
+  {
+    "timestamp": "2025-07-14T06:50:29-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 1,
+    "metrics": {
+      "successful_requests": 4,
+      "benchmark_duration_s": 5.73,
+      "total_input_tokens": 796,
+      "total_generated_tokens": 800,
+      "request_throughput_req_s": 0.7,
+      "output_token_throughput_tok_s": 139.72,
+      "total_token_throughput_tok_s": 278.75,
+      "ttft": {
+        "mean_ms": 12.74,
+        "median_ms": 12.8,
+        "p99_ms": 13.29
+      },
+      "tpot": {
+        "mean_ms": 7.13,
+        "median_ms": 7.12,
+        "p99_ms": 7.15
+      },
+      "itl": {
+        "mean_ms": 7.13,
+        "median_ms": 7.1,
+        "p99_ms": 7.78
+      },
+      "e2el": {
+        "mean_ms": 1430.89,
+        "median_ms": 1429.93,
+        "p99_ms": 1434.72
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:50:52-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 64,
+    "metrics": {
+      "successful_requests": 256,
+      "benchmark_duration_s": 8.45,
+      "total_input_tokens": 50944,
+      "total_generated_tokens": 51200,
+      "request_throughput_req_s": 30.28,
+      "output_token_throughput_tok_s": 6056.81,
+      "total_token_throughput_tok_s": 12083.33,
+      "ttft": {
+        "mean_ms": 214.72,
+        "median_ms": 257.18,
+        "p99_ms": 321.47
+      },
+      "tpot": {
+        "mean_ms": 9.5,
+        "median_ms": 9.3,
+        "p99_ms": 10.4
+      },
+      "itl": {
+        "mean_ms": 9.5,
+        "median_ms": 9.07,
+        "p99_ms": 15.18
+      },
+      "e2el": {
+        "mean_ms": 2106.19,
+        "median_ms": 2108.74,
+        "p99_ms": 2148.57
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:51:17-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 128,
+    "metrics": {
+      "successful_requests": 512,
+      "benchmark_duration_s": 10.2,
+      "total_input_tokens": 101888,
+      "total_generated_tokens": 102400,
+      "request_throughput_req_s": 50.22,
+      "output_token_throughput_tok_s": 10043.81,
+      "total_token_throughput_tok_s": 20037.4,
+      "ttft": {
+        "mean_ms": 100.55,
+        "median_ms": 79.36,
+        "p99_ms": 202.27
+      },
+      "tpot": {
+        "mean_ms": 12.16,
+        "median_ms": 12.18,
+        "p99_ms": 13.55
+      },
+      "itl": {
+        "mean_ms": 12.16,
+        "median_ms": 10.99,
+        "p99_ms": 37.35
+      },
+      "e2el": {
+        "mean_ms": 2519.9,
+        "median_ms": 2514.54,
+        "p99_ms": 2828.13
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:51:47-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 256,
+    "metrics": {
+      "successful_requests": 1024,
+      "benchmark_duration_s": 15.25,
+      "total_input_tokens": 203776,
+      "total_generated_tokens": 204800,
+      "request_throughput_req_s": 67.13,
+      "output_token_throughput_tok_s": 13426.16,
+      "total_token_throughput_tok_s": 26785.19,
+      "ttft": {
+        "mean_ms": 173.88,
+        "median_ms": 106.54,
+        "p99_ms": 402.49
+      },
+      "tpot": {
+        "mean_ms": 17.97,
+        "median_ms": 17.64,
+        "p99_ms": 22.03
+      },
+      "itl": {
+        "mean_ms": 17.97,
+        "median_ms": 15.14,
+        "p99_ms": 49.09
+      },
+      "e2el": {
+        "mean_ms": 3749.08,
+        "median_ms": 3658.74,
+        "p99_ms": 4461.71
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:53:10-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 1,
+    "metrics": {
+      "successful_requests": 4,
+      "benchmark_duration_s": 56.5,
+      "total_input_tokens": 1996,
+      "total_generated_tokens": 8000,
+      "request_throughput_req_s": 0.07,
+      "output_token_throughput_tok_s": 141.58,
+      "total_token_throughput_tok_s": 176.91,
+      "ttft": {
+        "mean_ms": 14.95,
+        "median_ms": 15.45,
+        "p99_ms": 15.74
+      },
+      "tpot": {
+        "mean_ms": 7.06,
+        "median_ms": 7.06,
+        "p99_ms": 7.06
+      },
+      "itl": {
+        "mean_ms": 7.06,
+        "median_ms": 7.05,
+        "p99_ms": 7.35
+      },
+      "e2el": {
+        "mean_ms": 14125.36,
+        "median_ms": 14124.17,
+        "p99_ms": 14135.89
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:55:17-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 64,
+    "metrics": {
+      "successful_requests": 256,
+      "benchmark_duration_s": 100.11,
+      "total_input_tokens": 127744,
+      "total_generated_tokens": 512000,
+      "request_throughput_req_s": 2.56,
+      "output_token_throughput_tok_s": 5114.55,
+      "total_token_throughput_tok_s": 6390.64,
+      "ttft": {
+        "mean_ms": 327.7,
+        "median_ms": 367.62,
+        "p99_ms": 559.79
+      },
+      "tpot": {
+        "mean_ms": 12.35,
+        "median_ms": 12.36,
+        "p99_ms": 12.53
+      },
+      "itl": {
+        "mean_ms": 12.35,
+        "median_ms": 12.18,
+        "p99_ms": 14.93
+      },
+      "e2el": {
+        "mean_ms": 25017.86,
+        "median_ms": 25067.6,
+        "p99_ms": 25240.18
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T06:58:08-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 128,
+    "metrics": {
+      "successful_requests": 512,
+      "benchmark_duration_s": 143.63,
+      "total_input_tokens": 255488,
+      "total_generated_tokens": 1024000,
+      "request_throughput_req_s": 3.56,
+      "output_token_throughput_tok_s": 7129.42,
+      "total_token_throughput_tok_s": 8908.21,
+      "ttft": {
+        "mean_ms": 530.02,
+        "median_ms": 402.48,
+        "p99_ms": 1237.61
+      },
+      "tpot": {
+        "mean_ms": 17.69,
+        "median_ms": 17.65,
+        "p99_ms": 18.01
+      },
+      "itl": {
+        "mean_ms": 17.69,
+        "median_ms": 17.29,
+        "p99_ms": 22.61
+      },
+      "e2el": {
+        "mean_ms": 35888.61,
+        "median_ms": 35931.11,
+        "p99_ms": 36529.1
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:03:00-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 256,
+    "metrics": {
+      "successful_requests": 1024,
+      "benchmark_duration_s": 262.72,
+      "total_input_tokens": 510976,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 3.9,
+      "output_token_throughput_tok_s": 7795.49,
+      "total_token_throughput_tok_s": 9740.47,
+      "ttft": {
+        "mean_ms": 2701.13,
+        "median_ms": 2837.93,
+        "p99_ms": 16498.07
+      },
+      "tpot": {
+        "mean_ms": 29.08,
+        "median_ms": 28.33,
+        "p99_ms": 38.11
+      },
+      "itl": {
+        "mean_ms": 29.08,
+        "median_ms": 26.99,
+        "p99_ms": 58.8
+      },
+      "e2el": {
+        "mean_ms": 60839.95,
+        "median_ms": 60037.28,
+        "p99_ms": 78363.49
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:03:48-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 1,
+    "metrics": {
+      "successful_requests": 4,
+      "benchmark_duration_s": 28.2,
+      "total_input_tokens": 3996,
+      "total_generated_tokens": 4000,
+      "request_throughput_req_s": 0.14,
+      "output_token_throughput_tok_s": 141.83,
+      "total_token_throughput_tok_s": 283.52,
+      "ttft": {
+        "mean_ms": 27.43,
+        "median_ms": 31.51,
+        "p99_ms": 32.04
+      },
+      "tpot": {
+        "mean_ms": 7.03,
+        "median_ms": 7.03,
+        "p99_ms": 7.04
+      },
+      "itl": {
+        "mean_ms": 7.03,
+        "median_ms": 7.02,
+        "p99_ms": 7.26
+      },
+      "e2el": {
+        "mean_ms": 7050.04,
+        "median_ms": 7049.92,
+        "p99_ms": 7062.74
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:05:03-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 64,
+    "metrics": {
+      "successful_requests": 256,
+      "benchmark_duration_s": 54.78,
+      "total_input_tokens": 255744,
+      "total_generated_tokens": 256000,
+      "request_throughput_req_s": 4.67,
+      "output_token_throughput_tok_s": 4673.39,
+      "total_token_throughput_tok_s": 9342.11,
+      "ttft": {
+        "mean_ms": 477.73,
+        "median_ms": 388.9,
+        "p99_ms": 1488.56
+      },
+      "tpot": {
+        "mean_ms": 13.22,
+        "median_ms": 13.3,
+        "p99_ms": 13.59
+      },
+      "itl": {
+        "mean_ms": 13.22,
+        "median_ms": 12.2,
+        "p99_ms": 15.53
+      },
+      "e2el": {
+        "mean_ms": 13680.54,
+        "median_ms": 13674.41,
+        "p99_ms": 14770.43
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:06:43-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 128,
+    "metrics": {
+      "successful_requests": 512,
+      "benchmark_duration_s": 78.93,
+      "total_input_tokens": 511488,
+      "total_generated_tokens": 512000,
+      "request_throughput_req_s": 6.49,
+      "output_token_throughput_tok_s": 6486.77,
+      "total_token_throughput_tok_s": 12967.05,
+      "ttft": {
+        "mean_ms": 747.73,
+        "median_ms": 530.23,
+        "p99_ms": 1820.03
+      },
+      "tpot": {
+        "mean_ms": 18.97,
+        "median_ms": 18.72,
+        "p99_ms": 20.18
+      },
+      "itl": {
+        "mean_ms": 18.97,
+        "median_ms": 17.32,
+        "p99_ms": 38.93
+      },
+      "e2el": {
+        "mean_ms": 19701.8,
+        "median_ms": 19824.1,
+        "p99_ms": 21630.04
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:09:34-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 256,
+    "metrics": {
+      "successful_requests": 1024,
+      "benchmark_duration_s": 148.21,
+      "total_input_tokens": 1022976,
+      "total_generated_tokens": 1024000,
+      "request_throughput_req_s": 6.91,
+      "output_token_throughput_tok_s": 6908.93,
+      "total_token_throughput_tok_s": 13810.96,
+      "ttft": {
+        "mean_ms": 1931.58,
+        "median_ms": 1688.96,
+        "p99_ms": 6347.09
+      },
+      "tpot": {
+        "mean_ms": 33.22,
+        "median_ms": 33.35,
+        "p99_ms": 40.63
+      },
+      "itl": {
+        "mean_ms": 33.22,
+        "median_ms": 27.89,
+        "p99_ms": 213.95
+      },
+      "e2el": {
+        "mean_ms": 35120.18,
+        "median_ms": 35006.92,
+        "p99_ms": 45648.81
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:10:06-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 1,
+    "metrics": {
+      "successful_requests": 4,
+      "benchmark_duration_s": 14.92,
+      "total_input_tokens": 19996,
+      "total_generated_tokens": 2000,
+      "request_throughput_req_s": 0.27,
+      "output_token_throughput_tok_s": 134.03,
+      "total_token_throughput_tok_s": 1474.1,
+      "ttft": {
+        "mean_ms": 115.63,
+        "median_ms": 142.66,
+        "p99_ms": 150.02
+      },
+      "tpot": {
+        "mean_ms": 7.24,
+        "median_ms": 7.24,
+        "p99_ms": 7.26
+      },
+      "itl": {
+        "mean_ms": 7.24,
+        "median_ms": 7.23,
+        "p99_ms": 7.57
+      },
+      "e2el": {
+        "mean_ms": 3729.9,
+        "median_ms": 3755.72,
+        "p99_ms": 3765.45
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:11:42-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 64,
+    "metrics": {
+      "successful_requests": 256,
+      "benchmark_duration_s": 76.22,
+      "total_input_tokens": 1279744,
+      "total_generated_tokens": 128000,
+      "request_throughput_req_s": 3.36,
+      "output_token_throughput_tok_s": 1679.28,
+      "total_token_throughput_tok_s": 18468.72,
+      "ttft": {
+        "mean_ms": 1424.03,
+        "median_ms": 668.28,
+        "p99_ms": 7888.13
+      },
+      "tpot": {
+        "mean_ms": 35.2,
+        "median_ms": 36.91,
+        "p99_ms": 37.76
+      },
+      "itl": {
+        "mean_ms": 35.2,
+        "median_ms": 22.03,
+        "p99_ms": 229.41
+      },
+      "e2el": {
+        "mean_ms": 18989.6,
+        "median_ms": 19102.69,
+        "p99_ms": 26298.1
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:14:42-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 128,
+    "metrics": {
+      "successful_requests": 512,
+      "benchmark_duration_s": 155.63,
+      "total_input_tokens": 2559488,
+      "total_generated_tokens": 256000,
+      "request_throughput_req_s": 3.29,
+      "output_token_throughput_tok_s": 1644.9,
+      "total_token_throughput_tok_s": 18090.65,
+      "ttft": {
+        "mean_ms": 12889.18,
+        "median_ms": 7428.81,
+        "p99_ms": 30130.04
+      },
+      "tpot": {
+        "mean_ms": 47.43,
+        "median_ms": 48.58,
+        "p99_ms": 70.61
+      },
+      "itl": {
+        "mean_ms": 47.43,
+        "median_ms": 27.5,
+        "p99_ms": 234.55
+      },
+      "e2el": {
+        "mean_ms": 36554.92,
+        "median_ms": 32309.51,
+        "p99_ms": 54419.53
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:20:23-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 256,
+    "metrics": {
+      "successful_requests": 1024,
+      "benchmark_duration_s": 307.9,
+      "total_input_tokens": 5118976,
+      "total_generated_tokens": 512000,
+      "request_throughput_req_s": 3.33,
+      "output_token_throughput_tok_s": 1662.9,
+      "total_token_throughput_tok_s": 18288.57,
+      "ttft": {
+        "mean_ms": 46484.42,
+        "median_ms": 51378.66,
+        "p99_ms": 60981.42
+      },
+      "tpot": {
+        "mean_ms": 48.34,
+        "median_ms": 48.71,
+        "p99_ms": 71.07
+      },
+      "itl": {
+        "mean_ms": 48.34,
+        "median_ms": 27.51,
+        "p99_ms": 234.82
+      },
+      "e2el": {
+        "mean_ms": 70605.81,
+        "median_ms": 75631.67,
+        "p99_ms": 86725.5
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:21:15-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 1,
+    "metrics": {
+      "successful_requests": 4,
+      "benchmark_duration_s": 30.99,
+      "total_input_tokens": 39996,
+      "total_generated_tokens": 4000,
+      "request_throughput_req_s": 0.13,
+      "output_token_throughput_tok_s": 129.05,
+      "total_token_throughput_tok_s": 1419.46,
+      "ttft": {
+        "mean_ms": 243.04,
+        "median_ms": 305.93,
+        "p99_ms": 311.17
+      },
+      "tpot": {
+        "mean_ms": 7.51,
+        "median_ms": 7.51,
+        "p99_ms": 7.52
+      },
+      "itl": {
+        "mean_ms": 7.51,
+        "median_ms": 7.5,
+        "p99_ms": 7.72
+      },
+      "e2el": {
+        "mean_ms": 7748.14,
+        "median_ms": 7808.22,
+        "p99_ms": 7824.28
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:25:47-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 64,
+    "metrics": {
+      "successful_requests": 256,
+      "benchmark_duration_s": 243.49,
+      "total_input_tokens": 2559744,
+      "total_generated_tokens": 256000,
+      "request_throughput_req_s": 1.05,
+      "output_token_throughput_tok_s": 1051.39,
+      "total_token_throughput_tok_s": 11564.28,
+      "ttft": {
+        "mean_ms": 19095.59,
+        "median_ms": 8090.44,
+        "p99_ms": 44631.43
+      },
+      "tpot": {
+        "mean_ms": 37.52,
+        "median_ms": 37.83,
+        "p99_ms": 58.13
+      },
+      "itl": {
+        "mean_ms": 37.52,
+        "median_ms": 26.44,
+        "p99_ms": 251.41
+      },
+      "e2el": {
+        "mean_ms": 56580.01,
+        "median_ms": 47608.18,
+        "p99_ms": 82344.65
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:34:25-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 128,
+    "metrics": {
+      "successful_requests": 512,
+      "benchmark_duration_s": 481.46,
+      "total_input_tokens": 5119488,
+      "total_generated_tokens": 512000,
+      "request_throughput_req_s": 1.06,
+      "output_token_throughput_tok_s": 1063.44,
+      "total_token_throughput_tok_s": 11696.74,
+      "ttft": {
+        "mean_ms": 71488.49,
+        "median_ms": 79442.62,
+        "p99_ms": 100316.15
+      },
+      "tpot": {
+        "mean_ms": 38.02,
+        "median_ms": 37.87,
+        "p99_ms": 60.4
+      },
+      "itl": {
+        "mean_ms": 38.02,
+        "median_ms": 26.43,
+        "p99_ms": 252.47
+      },
+      "e2el": {
+        "mean_ms": 109470.23,
+        "median_ms": 117268.79,
+        "p99_ms": 141001.55
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-14T07:51:13-07:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 256,
+    "metrics": {
+      "successful_requests": 1024,
+      "benchmark_duration_s": 954.89,
+      "total_input_tokens": 10238976,
+      "total_generated_tokens": 1024000,
+      "request_throughput_req_s": 1.07,
+      "output_token_throughput_tok_s": 1072.38,
+      "total_token_throughput_tok_s": 11795.11,
+      "ttft": {
+        "mean_ms": 175252.96,
+        "median_ms": 196658.24,
+        "p99_ms": 223196.01
+      },
+      "tpot": {
+        "mean_ms": 38.34,
+        "median_ms": 37.85,
+        "p99_ms": 61.85
+      },
+      "itl": {
+        "mean_ms": 38.34,
+        "median_ms": 26.41,
+        "p99_ms": 252.47
+      },
+      "e2el": {
+        "mean_ms": 213556.35,
+        "median_ms": 234520.2,
+        "p99_ms": 261123.57
+      }
+    }
+  }
+]

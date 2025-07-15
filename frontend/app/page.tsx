@@ -311,11 +311,6 @@ export default function Dashboard() {
 
   const availableMetrics = [
     { value: 'concurrency', label: 'Concurrency' },
-    { value: 'tps', label: 'Throughput (TPS)' },
-    { value: 'ttft_ms', label: 'Time to First Token (ms)' },
-    { value: 'successful_requests', label: 'Successful Requests' },
-    { value: 'request_throughput', label: 'Request Throughput' },
-    { value: 'total_token_throughput', label: 'Total Token Throughput' },
   ];
 
   // Y-axis options (limited set as requested)
