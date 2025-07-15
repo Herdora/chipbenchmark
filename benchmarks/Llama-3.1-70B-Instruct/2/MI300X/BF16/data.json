@@ -1,0 +1,66 @@
+[
+{
+  "timestamp": "2025-07-15T15:56:22+00:00",
+  "config": "Llama-3.1-8B-Instruct",
+  "model": "meta-llama/Llama-3.1-70B-Instruct",
+  "input_sequence_length": 200,
+  "output_sequence_length": 200,
+  "concurrency": 1,
+  "metrics": {
+    "successful_requests": 4,
+    "benchmark_duration_s": 30.00,
+    "total_input_tokens": 796,
+    "total_generated_tokens": 800,
+    "request_throughput_req_s": 0.13,
+    "output_token_throughput_tok_s": 26.66,
+    "total_token_throughput_tok_s": 53.19,
+    "ttft": { "mean_ms": 52.90, "median_ms": 57.42, "p99_ms": 58.61 },
+    "tpot": { "mean_ms": 37.42, "median_ms": 36.87, "p99_ms": 39.34 },
+    "itl":  { "mean_ms": 37.42,  "median_ms": 33.94,  "p99_ms": 69.09 },
+    "e2el": { "mean_ms": 7500.37, "median_ms": 7385.35, "p99_ms": 7886.15 }
+  }
+}
+,
+{
+  "timestamp": "2025-07-15T15:57:45+00:00",
+  "config": "Llama-3.1-8B-Instruct",
+  "model": "meta-llama/Llama-3.1-70B-Instruct",
+  "input_sequence_length": 200,
+  "output_sequence_length": 200,
+  "concurrency": 64,
+  "metrics": {
+    "successful_requests": 256,
+    "benchmark_duration_s": 42.60,
+    "total_input_tokens": 50944,
+    "total_generated_tokens": 51200,
+    "request_throughput_req_s": 6.01,
+    "output_token_throughput_tok_s": 1201.91,
+    "total_token_throughput_tok_s": 2397.81,
+    "ttft": { "mean_ms": 2125.99, "median_ms": 2282.53, "p99_ms": 3675.74 },
+    "tpot": { "mean_ms": 42.79, "median_ms": 44.47, "p99_ms": 51.31 },
+    "itl":  { "mean_ms": 42.79,  "median_ms": 37.85,  "p99_ms": 62.93 },
+    "e2el": { "mean_ms": 10640.53, "median_ms": 10322.03, "p99_ms": 11617.69 }
+  }
+}
+,
+{
+  "timestamp": "2025-07-15T15:59:23+00:00",
+  "config": "Llama-3.1-8B-Instruct",
+  "model": "meta-llama/Llama-3.1-70B-Instruct",
+  "input_sequence_length": 200,
+  "output_sequence_length": 200,
+  "concurrency": 128,
+  "metrics": {
+    "successful_requests": 512,
+    "benchmark_duration_s": 51.18,
+    "total_input_tokens": 101888,
+    "total_generated_tokens": 102400,
+    "request_throughput_req_s": 10.00,
+    "output_token_throughput_tok_s": 2000.69,
+    "total_token_throughput_tok_s": 3991.37,
+    "ttft": { "mean_ms": 1482.68, "median_ms": 445.30, "p99_ms": 4489.84 },
+    "tpot": { "mean_ms": 56.71, "median_ms": 54.16, "p99_ms": 72.56 },
+    "itl":  { "mean_ms": 56.71,  "median_ms": 49.71,  "p99_ms": 74.39 },
+    "e2el": { "mean_ms": 12767.49, "median_ms": 12151.96, "p99_ms": 16367.71 }
+  }
+}

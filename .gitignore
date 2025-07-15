@@ -170,9 +170,12 @@ scripts/temp/
 # Benchmark temporary files
 benchmarks/temp/
 benchmarks/*.tmp
+benchmarks/**/data.log
+benchmarks/**/data_snapshot.json
 
 # Vercel
 .vercel
 
 # Turbo
 .turbo 
+
