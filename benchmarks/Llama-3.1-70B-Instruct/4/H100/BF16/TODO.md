@@ -1,3 +1,0 @@
-# TODO
-
-- [ ] Complete this benchmark

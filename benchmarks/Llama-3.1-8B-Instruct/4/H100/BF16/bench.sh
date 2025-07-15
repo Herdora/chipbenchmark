@@ -1,8 +1,8 @@
 set -euo pipefail
 
-MODEL_NAME="meta-llama/Llama-3.1-70B-Instruct"
+MODEL_NAME="meta-llama/Llama-3.1-8B-Instruct"
 MODEL=${1:-$MODEL_NAME}
-PORT="${PORT:-8000}"
+PORT="${PORT:-8001}"
 SERVER_URL="http://localhost:$PORT"
 ISL_OSL=("200:200" "500:2000" "1000:1000" "5000:500" "10000:1000")
 CONCURRENCY_LEVELS=(1 64 128 256)
@@ -45,6 +45,7 @@ parse_vllm_output() {
     cat <<EOF
 {
   "timestamp": "$(date -Iseconds)",
+  "config": "Llama-3.1-8B-Instruct",
   "model": "$MODEL",
   "input_sequence_length": $isl,
   "output_sequence_length": $osl,

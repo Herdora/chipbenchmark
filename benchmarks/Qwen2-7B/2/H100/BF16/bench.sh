@@ -1,8 +1,8 @@
 set -euo pipefail
 
-MODEL_NAME="meta-llama/Llama-3.1-70B-Instruct"
+MODEL_NAME="Qwen/Qwen2-7B"
 MODEL=${1:-$MODEL_NAME}
-PORT="${PORT:-8000}"
+PORT="${PORT:-8002}"
 SERVER_URL="http://localhost:$PORT"
 ISL_OSL=("200:200" "500:2000" "1000:1000" "5000:500" "10000:1000")
 CONCURRENCY_LEVELS=(1 64 128 256)
@@ -70,7 +70,7 @@ echo "[" > "$JSONFILE"
 first_entry=true
 
 {
-  echo "=== Llama-3.1-8B-Instruct Benchmark started $(date) ==="
+  echo "=== $MODEL Benchmark started $(date) ==="
   echo "Model: $MODEL"
   echo "Server URL: $SERVER_URL"
   echo "Concurrency levels: ${CONCURRENCY_LEVELS[*]}"
