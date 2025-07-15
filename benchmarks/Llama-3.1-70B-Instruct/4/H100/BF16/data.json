@@ -397,3 +397,25 @@
     "e2el": { "mean_ms": 180580.22, "median_ms": 193565.43, "p99_ms": 218684.89 }
   }
 }
+,
+{
+  "timestamp": "2025-07-15T16:43:10-07:00",
+  "model": "meta-llama/Llama-3.1-70B-Instruct",
+  "input_sequence_length": 10000,
+  "output_sequence_length": 1000,
+  "concurrency": 256,
+  "metrics": {
+    "successful_requests": 1024,
+    "benchmark_duration_s": 1570.03,
+    "total_input_tokens": 10238976,
+    "total_generated_tokens": 1024000,
+    "request_throughput_req_s": 0.65,
+    "output_token_throughput_tok_s": 652.22,
+    "total_token_throughput_tok_s": 7173.73,
+    "ttft": { "mean_ms": 289542.16, "median_ms": 325638.34, "p99_ms": 354320.53 },
+    "tpot": { "mean_ms": 62.20, "median_ms": 61.90, "p99_ms": 90.21 },
+    "itl":  { "mean_ms": 62.20,  "median_ms": 32.12,  "p99_ms": 613.85 },
+    "e2el": { "mean_ms": 351684.25, "median_ms": 387413.38, "p99_ms": 420303.64 }
+  }
+}
+]
