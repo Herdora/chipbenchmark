@@ -26,7 +26,6 @@ import {
   CircularProgress,
   TablePagination,
   Checkbox,
-  ListItemText,
   Chip,
 } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
@@ -351,7 +350,6 @@ export default function Dashboard() {
   const yAxisMetrics = useMemo(() => [
     { value: 'output_token_throughput_tok_s', label: 'Output Token Throughput (tok/s)' },
     { value: 'ttft_mean_ms', label: 'Time to First Token - Mean (ms)' },
-    { value: 'total_token_throughput_tok_s', label: 'Total Token Throughput (tok/s)' },
   ], []);
 
   // Ensure Y-axis metric is valid
@@ -381,10 +379,10 @@ export default function Dashboard() {
     '#17becf'  // cyan
   ];
 
-  // Chip style for soft blue
+  // Chip style with no background
   const softBlueChipSx = {
-    bgcolor: '#e3f2fd',
-    color: 'primary.main',
+    bgcolor: 'transparent',
+    color: 'text.primary',
     fontWeight: 600,
     borderRadius: 1,
     fontSize: 12,
@@ -483,9 +481,21 @@ export default function Dashboard() {
               )}
             >
               {filterOptions.tensorParallelisms.map((tp) => (
-                <MenuItem key={tp} value={tp}>
-                  <Checkbox checked={filters.tensorParallelisms.includes(tp)} />
-                  <ListItemText primary={`TP:${tp}`} />
+                <MenuItem key={tp} value={tp} sx={{ py: 0.5 }}>
+                  <Checkbox checked={filters.tensorParallelisms.includes(tp)} size="small" />
+                  <Box sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    bgcolor: filters.tensorParallelisms.includes(tp) ? 'primary.main' : 'grey.100',
+                    color: filters.tensorParallelisms.includes(tp) ? 'white' : 'text.primary',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    minWidth: 'fit-content'
+                  }}>
+                    TP:{tp}
+                  </Box>
                 </MenuItem>
               ))}
             </Select>
@@ -509,9 +519,21 @@ export default function Dashboard() {
               )}
             >
               {filterOptions.chips.map((chip) => (
-                <MenuItem key={chip} value={chip}>
-                  <Checkbox checked={filters.chips.includes(chip)} />
-                  <ListItemText primary={chip} />
+                <MenuItem key={chip} value={chip} sx={{ py: 0.5 }}>
+                  <Checkbox checked={filters.chips.includes(chip)} size="small" />
+                  <Box sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    bgcolor: filters.chips.includes(chip) ? 'primary.main' : 'grey.100',
+                    color: filters.chips.includes(chip) ? 'white' : 'text.primary',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    minWidth: 'fit-content'
+                  }}>
+                    {chip}
+                  </Box>
                 </MenuItem>
               ))}
             </Select>
@@ -535,9 +557,21 @@ export default function Dashboard() {
               )}
             >
               {filterOptions.precisions.map((precision) => (
-                <MenuItem key={precision} value={precision}>
-                  <Checkbox checked={filters.precisions.includes(precision)} />
-                  <ListItemText primary={precision} />
+                <MenuItem key={precision} value={precision} sx={{ py: 0.5 }}>
+                  <Checkbox checked={filters.precisions.includes(precision)} size="small" />
+                  <Box sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                    bgcolor: filters.precisions.includes(precision) ? 'primary.main' : 'grey.100',
+                    color: filters.precisions.includes(precision) ? 'white' : 'text.primary',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    minWidth: 'fit-content'
+                  }}>
+                    {precision}
+                  </Box>
                 </MenuItem>
               ))}
             </Select>
