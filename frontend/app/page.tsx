@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
-// import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
+import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
 import {
   Box,
   FormControl,
@@ -59,7 +59,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function ChartTooltip({ point, xMetric, yMetric }: {
+function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
   point: {
     data: {
       chip: string;
@@ -72,19 +72,44 @@ function ChartTooltip({ point, xMetric, yMetric }: {
   };
   xMetric: string;
   yMetric: string;
+  selectedModel: string;
 }) {
   const { data } = point;
+  const [hardwareInfo, setHardwareInfo] = useState<string>('Loading hardware info...');
+
+  // Load hardware info when component mounts
+  React.useEffect(() => {
+    const loadHardwareInfo = async () => {
+      try {
+        const hardware = await fetchHardwareInfo(
+          selectedModel,
+          data.tensorParallelism,
+          data.chip,
+          data.precision
+        );
+        setHardwareInfo(formatHardwareInfo(hardware));
+      } catch (error) {
+        console.error('Error loading hardware info:', error);
+        setHardwareInfo('Hardware info not available');
+      }
+    };
+
+    loadHardwareInfo();
+  }, [selectedModel, data.tensorParallelism, data.chip, data.precision]);
 
   return (
-    <Box sx={{ p: 2, backgroundColor: 'background.paper', border: 1, borderColor: 'divider' }}>
-      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+    <Box sx={{ p: 2, backgroundColor: 'background.paper', border: 1, borderColor: 'divider', minWidth: 200 }}>
+      <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
         {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" sx={{ mb: 0.5 }}>
         {xMetric}: {data.x}
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" sx={{ mb: 1 }}>
         {yMetric}: {data.y}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: 11, color: 'text.secondary', fontStyle: 'italic' }}>
+        {hardwareInfo}
       </Typography>
     </Box>
   );
@@ -817,6 +842,7 @@ export default function Dashboard() {
                             point={point}
                             xMetric={xMetric}
                             yMetric={yMetric}
+                            selectedModel={selectedModel}
                           />
                         )}
                       />
