@@ -187,3 +187,25 @@
     "e2el": { "mean_ms": 705570.49, "median_ms": 794210.99, "p99_ms": 821565.38 }
   }
 }
+,
+{
+  "timestamp": "2025-07-16T03:36:43-07:00",
+  "model": "Qwen/Qwen3-14B",
+  "input_sequence_length": 10000,
+  "output_sequence_length": 1000,
+  "concurrency": 1024,
+  "metrics": {
+    "successful_requests": 4096,
+    "benchmark_duration_s": 6407.56,
+    "total_input_tokens": 40960000,
+    "total_generated_tokens": 4096000,
+    "request_throughput_req_s": 0.64,
+    "output_token_throughput_tok_s": 639.25,
+    "total_token_throughput_tok_s": 7031.70,
+    "ttft": { "mean_ms": 1367287.42, "median_ms": 1551886.30, "p99_ms": 1580200.15 },
+    "tpot": { "mean_ms": 39.35, "median_ms": 38.55, "p99_ms": 63.87 },
+    "itl":  { "mean_ms": 39.35,  "median_ms": 26.61,  "p99_ms": 414.19 },
+    "e2el": { "mean_ms": 1406596.40, "median_ms": 1590530.79, "p99_ms": 1618730.32 }
+  }
+}
+]

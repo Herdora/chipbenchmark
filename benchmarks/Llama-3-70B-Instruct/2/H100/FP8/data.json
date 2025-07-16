@@ -481,3 +481,24 @@
     "e2el": { "mean_ms": 390405.27, "median_ms": 435787.38, "p99_ms": 454681.17 }
   }
 }
+,
+{
+  "timestamp": "2025-07-16T03:27:54-07:00",
+  "model": "RedHatAI/Meta-Llama-3-70B-Instruct-FP8",
+  "input_sequence_length": 5000,
+  "output_sequence_length": 500,
+  "concurrency": 1024,
+  "metrics": {
+    "successful_requests": 4096,
+    "benchmark_duration_s": 3526.73,
+    "total_input_tokens": 20475904,
+    "total_generated_tokens": 2048000,
+    "request_throughput_req_s": 1.16,
+    "output_token_throughput_tok_s": 580.71,
+    "total_token_throughput_tok_s": 6386.62,
+    "ttft": { "mean_ms": 742150.22, "median_ms": 840638.51, "p99_ms": 858665.47 },
+    "tpot": { "mean_ms": 69.64, "median_ms": 68.71, "p99_ms": 100.62 },
+    "itl":  { "mean_ms": 69.64,  "median_ms": 32.75,  "p99_ms": 751.04 },
+    "e2el": { "mean_ms": 776899.12, "median_ms": 875071.71, "p99_ms": 893118.02 }
+  }
+}
