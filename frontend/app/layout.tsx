@@ -62,21 +62,22 @@ export default function RootLayout({
                   height: { xs: 56, md: 64 },
                   minHeight: { xs: 56, md: 64 },
                   py: 0,
-                  px: { xs: 1, md: 0 }
+                  pl: { xs: 1, md: 3 }, // Add padding to the left
+                  pr: { xs: 2, md: 3 } // Add padding to the right
                 }}>
                   {/* Logo and Title */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
                     <Image
                       src={logo}
                       alt="chip benchmark Logo"
-                      width={32}
-                      height={32}
+                      width={48}
+                      height={48}
                       style={{
                         objectFit: 'contain',
                         width: 'auto',
                         height: 'auto',
-                        maxWidth: 36,
-                        maxHeight: 36
+                        maxWidth: 52,
+                        maxHeight: 52
                       }}
                     />
                     <Box>

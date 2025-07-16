@@ -390,7 +390,8 @@ export default function Dashboard() {
     fontSize: 12,
   };
 
-  if (loading || discoveryLoading) {
+  // Show loading spinner only for initial discovery (model dropdown)
+  if (discoveryLoading) {
     return (
       <Box sx={{
         display: 'flex',
@@ -401,7 +402,7 @@ export default function Dashboard() {
         gap: 2
       }}>
         <CircularProgress />
-        <Typography>Loading benchmark data...</Typography>
+        <Typography>Loading available models...</Typography>
       </Box>
     );
   }
@@ -419,7 +420,7 @@ export default function Dashboard() {
       {/* Model Selection and Filters */}
       <Box sx={{
         display: 'flex',
-        gap: { xs: 1, md: 2 },
+        gap: { xs: 0.5, md: 2 },
         p: { xs: 1, md: 2 },
         borderBottom: 1,
         borderColor: 'divider',
@@ -429,13 +430,16 @@ export default function Dashboard() {
         minWidth: 0
       }}>
         {/* Primary Model Selector */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 140, md: 180 }, maxWidth: { xs: 180, md: 220 } }}>
-          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Model</InputLabel>
+        <FormControl size="small" variant="outlined" sx={{
+          minWidth: { xs: 120, md: 180 },
+          maxWidth: { xs: 140, md: 220 }
+        }}>
+          <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Model</InputLabel>
           <Select
             value={selectedModel}
             label="Model"
             onChange={(e) => setSelectedModel(e.target.value)}
-            sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+            sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
           >
             {discovery && discovery.models.length > 0 ? (
               discovery.models.map((model) => (
@@ -452,17 +456,24 @@ export default function Dashboard() {
         </FormControl>
 
         {/* Filter Section */}
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Typography variant="h6">Filters:</Typography>
+        <Box sx={{ display: 'flex', gap: { xs: 0.5, md: 2 }, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{
+            display: { xs: 'none', md: 'block' },
+            fontSize: { md: 16 },
+            fontWeight: 600
+          }}>
+            Filters:
+          </Typography>
 
           {/* Tensor Parallelism Filter */}
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Tensor Parallelism</InputLabel>
+          <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
+            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Tensor Parallelism</InputLabel>
             <Select
               multiple
               value={filters.tensorParallelisms}
               onChange={handleMultiSelectChange('tensorParallelisms')}
               input={<OutlinedInput label="Tensor Parallelism" />}
+              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
               renderValue={(selected) => (
                 selected.length > 1
                   ? `${selected.length} selected`
@@ -481,13 +492,14 @@ export default function Dashboard() {
           </FormControl>
 
           {/* Chip Filter */}
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Chips</InputLabel>
+          <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
+            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Chips</InputLabel>
             <Select
               multiple
               value={filters.chips}
               onChange={handleMultiSelectChange('chips')}
               input={<OutlinedInput label="Chips" />}
+              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
               renderValue={(selected) => (
                 selected.length > 1
                   ? `${selected.length} selected`
@@ -506,13 +518,14 @@ export default function Dashboard() {
           </FormControl>
 
           {/* Precision Filter */}
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Precisions</InputLabel>
+          <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
+            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Precisions</InputLabel>
             <Select
               multiple
               value={filters.precisions}
               onChange={handleMultiSelectChange('precisions')}
               input={<OutlinedInput label="Precisions" />}
+              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
               renderValue={(selected) => (
                 selected.length > 1
                   ? `${selected.length} selected`
@@ -531,13 +544,14 @@ export default function Dashboard() {
           </FormControl>
         </Box>
 
-        <Box sx={{ flexGrow: 1, minWidth: { xs: 8, md: 16 } }} />
+        <Box sx={{ flexGrow: 1, minWidth: { xs: 4, md: 16 } }} />
 
         <Typography variant="body2" color="text.secondary" sx={{
-          fontSize: { xs: 10, md: 12 },
+          fontSize: { xs: 9, md: 12 },
           flexShrink: 1,
           textAlign: 'right',
-          lineHeight: 1.2
+          lineHeight: 1.2,
+          display: { xs: 'none', sm: 'block' }
         }}>
           {activeTab === 0
             ? `${tableFilteredData.length} of ${modelData?.length || 0} results`
@@ -689,7 +703,7 @@ export default function Dashboard() {
 
               {/* Chart Content */}
               <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                {chartData.length === 0 || chartData.every(series => series.data.length === 0) ? (
+                {loading ? (
                   <Box sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -699,99 +713,114 @@ export default function Dashboard() {
                     height: '100%',
                     width: '100%'
                   }}>
-                    <Typography variant="h6" color="text.secondary">
-                      No data to display
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Try adjusting filters or select a different model
-                    </Typography>
+                    <CircularProgress />
+                    <Typography>Loading benchmark data...</Typography>
                   </Box>
                 ) : (
-                  <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative' }}>
-                    <ResponsiveLine
-                      data={chartData}
-                      margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
-                      xScale={{
-                        type: 'linear',
-                        min: 'auto',
-                        max: 'auto'
-                      }}
-                      yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-                      colors={customColors}
-                      pointSize={20}
-                      pointColor={{ theme: 'background' }}
-                      pointBorderWidth={6}
-                      pointBorderColor={{ from: 'serieColor' }}
-                      enablePointLabel={false}
-                      useMesh={true}
-                      lineWidth={3}
-                      enableArea={false}
-                      curve="monotoneX"
-                      enableGridX={true}
-                      enableGridY={true}
-                      gridXValues={availableXValues}
-                      axisTop={null}
-                      axisRight={null}
-                      axisBottom={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        tickRotation: 0,
-                        legend: getMetricLabel(xMetric),
-                        legendPosition: 'middle',
-                        legendOffset: 46,
-                        tickValues: availableXValues
-                      }}
-                      axisLeft={{
-                        tickSize: 5,
-                        tickPadding: 5,
-                        tickRotation: 0,
-                        legend: getMetricLabel(yMetric),
-                        legendPosition: 'middle',
-                        legendOffset: -60
-                      }}
-                      legends={[]}
-                      tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                        <ChartTooltip
-                          point={point}
-                          xMetric={xMetric}
-                          yMetric={yMetric}
-                        />
-                      )}
-                    />
-                    {/* Custom Legend Box */}
+                  chartData.length === 0 || chartData.every(series => series.data.length === 0) ? (
                     <Box sx={{
-                      position: 'absolute',
-                      right: 16,
-                      bottom: 80,
-                      zIndex: 10,
-                      bgcolor: 'background.paper',
-                      border: 1,
-                      borderColor: 'divider',
-                      borderRadius: 1,
-                      boxShadow: 2,
-                      px: 2,
-                      py: 1,
-                      minWidth: 120,
-                      maxWidth: 220,
-                      fontSize: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      gap: 2,
+                      height: '100%',
+                      width: '100%'
                     }}>
-                      {chartData.map((series, idx) => (
-                        <Box key={series.id} sx={{ display: 'flex', alignItems: 'center', mb: idx !== chartData.length - 1 ? 0.5 : 0 }}>
-                          <Box sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            bgcolor: customColors[idx % customColors.length],
-                            mr: 1,
-                            flexShrink: 0
-                          }} />
-                          <Typography sx={{ fontSize: 12, color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {series.id}
-                          </Typography>
-                        </Box>
-                      ))}
+                      <Typography variant="h6" color="text.secondary">
+                        No data to display
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Try adjusting filters or select a different model
+                      </Typography>
                     </Box>
-                  </Box>
+                  ) : (
+                    <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative' }}>
+                      <ResponsiveLine
+                        data={chartData}
+                        margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
+                        xScale={{
+                          type: 'linear',
+                          min: 'auto',
+                          max: 'auto'
+                        }}
+                        yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+                        colors={customColors}
+                        pointSize={20}
+                        pointColor={{ theme: 'background' }}
+                        pointBorderWidth={6}
+                        pointBorderColor={{ from: 'serieColor' }}
+                        enablePointLabel={false}
+                        useMesh={true}
+                        lineWidth={3}
+                        enableArea={false}
+                        curve="monotoneX"
+                        enableGridX={true}
+                        enableGridY={true}
+                        gridXValues={availableXValues}
+                        axisTop={null}
+                        axisRight={null}
+                        axisBottom={{
+                          tickSize: 5,
+                          tickPadding: 5,
+                          tickRotation: 0,
+                          legend: getMetricLabel(xMetric),
+                          legendPosition: 'middle',
+                          legendOffset: 46,
+                          tickValues: availableXValues
+                        }}
+                        axisLeft={{
+                          tickSize: 5,
+                          tickPadding: 5,
+                          tickRotation: 0,
+                          legend: getMetricLabel(yMetric),
+                          legendPosition: 'middle',
+                          legendOffset: -60
+                        }}
+                        legends={[]}
+                        tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+                          <ChartTooltip
+                            point={point}
+                            xMetric={xMetric}
+                            yMetric={yMetric}
+                          />
+                        )}
+                      />
+                      {/* Custom Legend Box */}
+                      <Box sx={{
+                        position: 'absolute',
+                        right: 16,
+                        bottom: 80,
+                        zIndex: 10,
+                        bgcolor: 'background.paper',
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        boxShadow: 2,
+                        px: 2,
+                        py: 1,
+                        minWidth: 120,
+                        maxWidth: 220,
+                        fontSize: 12,
+                      }}>
+                        {chartData.map((series, idx) => (
+                          <Box key={series.id} sx={{ display: 'flex', alignItems: 'center', mb: idx !== chartData.length - 1 ? 0.5 : 0 }}>
+                            <Box sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              bgcolor: customColors[idx % customColors.length],
+                              mr: 1,
+                              flexShrink: 0
+                            }} />
+                            <Typography sx={{ fontSize: 12, color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {series.id}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  )
                 )}
               </Box>
             </Box>
@@ -800,139 +829,166 @@ export default function Dashboard() {
 
         <TabPanel value={activeTab} index={1}>
           <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
-            {/* Table */}
-            <TableContainer component={Paper} sx={{
-              flexGrow: 1,
-              overflow: 'auto',
-              maxHeight: 'calc(100% - 60px)' // Reserve space for pagination
-            }}>
-              <Table stickyHeader size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'chip'}
-                        direction={sortBy === 'chip' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('chip')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Chip
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'precision'}
-                        direction={sortBy === 'precision' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('precision')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Precision
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'input_sequence_length'}
-                        direction={sortBy === 'input_sequence_length' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('input_sequence_length')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Input Length
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'output_sequence_length'}
-                        direction={sortBy === 'output_sequence_length' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('output_sequence_length')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Output Length
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'concurrency'}
-                        direction={sortBy === 'concurrency' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('concurrency')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Concurrency
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'tps'}
-                        direction={sortBy === 'tps' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('tps')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Throughput (TPS)
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'ttft_ms'}
-                        direction={sortBy === 'ttft_ms' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('ttft_ms')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        TTFT (ms)
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell>
-                      <TableSortLabel
-                        active={sortBy === 'successful_requests'}
-                        direction={sortBy === 'successful_requests' ? sortDirection : 'asc'}
-                        onClick={() => handleSort('successful_requests')}
-                        sx={{ fontSize: 12 }}
-                      >
-                        Requests
-                      </TableSortLabel>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedTableData.map((row, index) => (
-                    <TableRow key={page * rowsPerPage + index} hover>
-                      <TableCell sx={{ fontSize: 11 }}>{row.chip}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.precision.toUpperCase()}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.input_sequence_length}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.output_sequence_length}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.concurrency}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.output_token_throughput_tok_s.toFixed(2)}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.ttft_mean_ms.toFixed(2)}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.successful_requests}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {loading ? (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: 2,
+                height: '100%',
+                width: '100%'
+              }}>
+                <CircularProgress />
+                <Typography>Loading benchmark data...</Typography>
+              </Box>
+            ) : (
+              <>
+                {/* Table */}
+                <TableContainer component={Paper} sx={{
+                  flexGrow: 1,
+                  overflow: 'auto',
+                  maxHeight: 'calc(100% - 60px)' // Reserve space for pagination
+                }}>
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'chip'}
+                            direction={sortBy === 'chip' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('chip')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Chip
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'precision'}
+                            direction={sortBy === 'precision' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('precision')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Precision
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'input_sequence_length'}
+                            direction={sortBy === 'input_sequence_length' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('input_sequence_length')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Input Length
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'output_sequence_length'}
+                            direction={sortBy === 'output_sequence_length' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('output_sequence_length')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Output Length
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'concurrency'}
+                            direction={sortBy === 'concurrency' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('concurrency')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Concurrency
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'tps'}
+                            direction={sortBy === 'tps' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('tps')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Throughput (TPS)
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'ttft_ms'}
+                            direction={sortBy === 'ttft_ms' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('ttft_ms')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            TTFT (ms)
+                          </TableSortLabel>
+                        </TableCell>
+                        <TableCell>
+                          <TableSortLabel
+                            active={sortBy === 'successful_requests'}
+                            direction={sortBy === 'successful_requests' ? sortDirection : 'asc'}
+                            onClick={() => handleSort('successful_requests')}
+                            sx={{ fontSize: 12 }}
+                          >
+                            Requests
+                          </TableSortLabel>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {paginatedTableData.map((row, index) => (
+                        <TableRow key={page * rowsPerPage + index} hover>
+                          <TableCell sx={{ fontSize: 11 }}>{row.chip}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.precision.toUpperCase()}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.input_sequence_length}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.output_sequence_length}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.concurrency}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.output_token_throughput_tok_s.toFixed(2)}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.ttft_mean_ms.toFixed(2)}</TableCell>
+                          <TableCell sx={{ fontSize: 11 }}>{row.successful_requests}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
 
-            {/* Table Pagination */}
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 50, 100]}
-              component="div"
-              count={tableData.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{
-                borderTop: 1,
-                borderColor: 'divider',
-                backgroundColor: 'background.paper',
-                '& .MuiTablePagination-toolbar': {
-                  fontSize: { xs: 11, md: 14 },
-                  minHeight: { xs: 42, md: 52 }
-                },
-                '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                  fontSize: { xs: 11, md: 12 }
-                }
-              }}
-            />
+                {/* Table Pagination */}
+                <TablePagination
+                  rowsPerPageOptions={[10, 25, 50, 100]}
+                  component="div"
+                  count={tableData.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    borderTop: 1,
+                    borderColor: 'divider',
+                    backgroundColor: 'background.paper',
+                    '& .MuiTablePagination-toolbar': {
+                      fontSize: { xs: 11, md: 14 },
+                      minHeight: { xs: 42, md: 52 }
+                    },
+                    '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                      fontSize: { xs: 11, md: 12 }
+                    }
+                  }}
+                />
+              </>
+            )}
           </Box>
         </TabPanel>
       </Box>
+
+      {/* Mobile bottom filler bar to reduce chart height */}
+      <Box sx={{
+        display: { xs: 'block', md: 'none' },
+        height: { xs: 80, sm: 60 },
+        backgroundColor: 'background.default',
+        borderTop: 1,
+        borderColor: 'divider',
+        flexShrink: 0
+      }} />
     </Box>
   );
 }
