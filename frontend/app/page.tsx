@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
-import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
+// import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
 import {
   Box,
   FormControl,
@@ -25,11 +25,15 @@ import {
   SelectChangeEvent,
   CircularProgress,
   TablePagination,
+  Checkbox,
+  ListItemText,
+  Chip,
 } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
 import { RequestBenchmark } from '@/components/RequestHardware';
 
 interface FilterState {
+  tensorParallelisms: string[];
   chips: string[];
   precisions: string[];
 }
@@ -56,51 +60,32 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function ChartTooltip({ point, selectedModel, xMetric, yMetric }: {
+function ChartTooltip({ point, xMetric, yMetric }: {
   point: {
     data: {
       chip: string;
       precision: string;
-      concurrency: number;
-      input_sequence_length: number;
-      output_sequence_length: number;
-      x: number;
-      y: number;
+      tensorParallelism: string;
+      [key: string]: string | number | undefined;
     };
   };
-  selectedModel: string;
   xMetric: string;
   yMetric: string;
 }) {
-  const [hardwareInfo, setHardwareInfo] = React.useState<string>('');
-
-  React.useEffect(() => {
-    const loadHardwareInfo = async () => {
-      const hardware = await fetchHardwareInfo(selectedModel, point.data.chip, point.data.precision);
-      setHardwareInfo(formatHardwareInfo(hardware));
-    };
-    loadHardwareInfo();
-  }, [selectedModel, point.data.chip, point.data.precision]);
+  const { data } = point;
 
   return (
-    <div style={{
-      background: 'white',
-      padding: '12px 16px',
-      border: '1px solid #ccc',
-      borderRadius: '4px',
-      fontSize: '12px',
-      minWidth: '200px',
-      whiteSpace: 'nowrap'
-    }}>
-      <strong>{point.data.chip} ({point.data.precision.toUpperCase()})</strong><br />
-      {hardwareInfo && <span style={{ color: '#666' }}>{hardwareInfo}</span>}
-      {hardwareInfo && <br />}
-      {selectedModel}<br />
-      I/O: {point.data.input_sequence_length}/{point.data.output_sequence_length}<br />
-      Concurrency: {point.data.concurrency}<br />
-      {getMetricLabel(yMetric)}: {point.data.y}<br />
-      {getMetricLabel(xMetric)}: {point.data.x}
-    </div>
+    <Box sx={{ p: 2, backgroundColor: 'background.paper', border: 1, borderColor: 'divider' }}>
+      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+        {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
+      </Typography>
+      <Typography variant="body2">
+        {xMetric}: {data[xMetric]}
+      </Typography>
+      <Typography variant="body2">
+        {yMetric}: {data[yMetric]}
+      </Typography>
+    </Box>
   );
 }
 
@@ -114,7 +99,9 @@ export default function Dashboard() {
   // Set default model once discovery is loaded
   React.useEffect(() => {
     if (!discoveryLoading && discovery && discovery.models.length > 0 && !selectedModel) {
-      setSelectedModel(discovery.models[0]);
+      // Default to Llama-3.1-8B-Instruct
+      const defaultModel = discovery.models.find(model => model === 'Llama-3.1-8B-Instruct') || discovery.models[0];
+      setSelectedModel(defaultModel);
     }
   }, [discovery, discoveryLoading, selectedModel]);
 
@@ -124,13 +111,34 @@ export default function Dashboard() {
   }, [selectedModel]);
 
   // Load data for selected model
-  const { results: modelData, loading } = useModelBenchmarkData(selectedModel);
+  const { data: modelData, loading } = useModelBenchmarkData(selectedModel);
 
-  // Secondary filters
+  // Secondary filters - default to empty arrays which means "all"
   const [filters, setFilters] = useState<FilterState>({
+    tensorParallelisms: [],
     chips: [],
     precisions: []
   });
+
+  // Get filter options from current model data with fallback
+  const filterOptions = useFilterOptions(modelData);
+
+  // Set default filters when model data is loaded
+  React.useEffect(() => {
+    if (modelData && modelData.length > 0 && filterOptions) {
+      // Get available options for the current model
+      const availableTps = Array.from(new Set(modelData.map(d => d.tensorParallelism))).sort();
+      const availableChips = Array.from(new Set(modelData.map(d => d.chip))).sort();
+      const availablePrecisions = Array.from(new Set(modelData.map(d => d.precision))).sort();
+
+      // Set defaults: first TP, all chips, first precision
+      setFilters({
+        tensorParallelisms: availableTps.length > 0 ? [availableTps[0]] : [],
+        chips: availableChips, // All chips selected
+        precisions: availablePrecisions.length > 0 ? [availablePrecisions[0]] : [] // Only first precision
+      });
+    }
+  }, [modelData, filterOptions]);
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -142,17 +150,17 @@ export default function Dashboard() {
 
   // Chart axis selectors
   const [xMetric, setXMetric] = useState('concurrency');
-  const [yMetric, setYMetric] = useState('tps');
+  const [yMetric, setYMetric] = useState('output_token_throughput_tok_s');
 
   // I/O sequence length selectors - separate for chart and table
   const [chartIoConfig, setChartIoConfig] = useState<string>('200/200');
   const tableIoConfig: 'all' | string = 'all'; // Fixed value since setter was unused
 
-  // Get filter options from current model data with fallback
-  const filterOptions = useFilterOptions(modelData);
-
   // Get available I/O configurations
   const ioOptions = useMemo(() => {
+    if (!modelData || !Array.isArray(modelData)) {
+      return [];
+    }
     const configs = Array.from(new Set(modelData.map(d => `${d.input_sequence_length}/${d.output_sequence_length}`)))
       .sort((a, b) => {
         const [aInput, aOutput] = a.split('/').map(Number);
@@ -162,13 +170,23 @@ export default function Dashboard() {
     return configs;
   }, [modelData]);
 
+  // Set chartIoConfig to first available option if default is not available
+  React.useEffect(() => {
+    if (ioOptions.length > 0 && !ioOptions.includes(chartIoConfig)) {
+      setChartIoConfig(ioOptions[0]);
+    }
+  }, [ioOptions, chartIoConfig]);
+
   // Apply filters and restrict to specific concurrency values
   const ALLOWED_CONCURRENCIES = [1, 64, 128, 256];
-  const filteredData = useFilteredBenchmarkData(modelData, {
+  const memoizedFilters = useMemo(() => ({
+    tensorParallelisms: filters.tensorParallelisms,
     chips: filters.chips,
     precisions: filters.precisions,
     concurrencies: ALLOWED_CONCURRENCIES
-  });
+  }), [filters.tensorParallelisms, filters.chips, filters.precisions]);
+
+  const filteredData = useFilteredBenchmarkData(modelData, memoizedFilters);
 
   // Filter data for chart by I/O configuration
   const chartFilteredData = useMemo(() => {
@@ -203,19 +221,19 @@ export default function Dashboard() {
 
   // Chart data processing for Nivo Line chart
   const chartData = useMemo(() => {
-    // Group data by chip-precision combination
+    // Group data by chip-precision-TP combination
     const groupedData = chartFilteredData.reduce((acc, item) => {
-      const key = `${item.chip} (${item.precision.toUpperCase()})`;
-      
+      const key = `${item.chip} (${item.precision.toUpperCase()} - TP ${item.tensorParallelism})`;
+
       // Get x and y values with proper validation
       const xValue = item[xMetric as keyof typeof item] as number;
       const yValue = item[yMetric as keyof typeof item] as number;
-      
+
       // Skip data points with invalid values
       if (xValue == null || yValue == null || isNaN(xValue) || isNaN(yValue)) {
         return acc;
       }
-      
+
       if (!acc[key]) {
         acc[key] = [];
       }
@@ -224,6 +242,7 @@ export default function Dashboard() {
         y: yValue,
         chip: item.chip,
         precision: item.precision,
+        tensorParallelism: item.tensorParallelism,
         concurrency: item.concurrency,
         input_sequence_length: item.input_sequence_length,
         output_sequence_length: item.output_sequence_length,
@@ -234,6 +253,7 @@ export default function Dashboard() {
       y: number;
       chip: string;
       precision: string;
+      tensorParallelism: string;
       concurrency: number;
       input_sequence_length: number;
       output_sequence_length: number;
@@ -327,16 +347,16 @@ export default function Dashboard() {
 
   // Y-axis options (limited set as requested)
   const yAxisMetrics = useMemo(() => [
-    { value: 'tps', label: 'Throughput (TPS)' },
-    { value: 'ttft_ms', label: 'Time to First Token (ms)' },
-    { value: 'total_token_throughput', label: 'Total Token Throughput' },
+    { value: 'output_token_throughput_tok_s', label: 'Output Token Throughput (tok/s)' },
+    { value: 'ttft_mean_ms', label: 'Time to First Token - Mean (ms)' },
+    { value: 'total_token_throughput_tok_s', label: 'Total Token Throughput (tok/s)' },
   ], []);
 
   // Ensure Y-axis metric is valid
   React.useEffect(() => {
     const validYMetrics = yAxisMetrics.map(m => m.value);
     if (!validYMetrics.includes(yMetric)) {
-      setYMetric('tps'); // Reset to default if current value is invalid
+      setYMetric('output_token_throughput_tok_s'); // Reset to default if current value is invalid
     }
   }, [yAxisMetrics, yMetric]);
 
@@ -358,6 +378,15 @@ export default function Dashboard() {
     '#bcbd22', // olive
     '#17becf'  // cyan
   ];
+
+  // Chip style for soft blue
+  const softBlueChipSx = {
+    bgcolor: '#e3f2fd',
+    color: 'primary.main',
+    fontWeight: 600,
+    borderRadius: 1,
+    fontSize: 12,
+  };
 
   if (loading || discoveryLoading) {
     return (
@@ -420,128 +449,85 @@ export default function Dashboard() {
           </Select>
         </FormControl>
 
-        {/* Secondary Filters */}
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 80, md: 120 }, maxWidth: { xs: 140, md: 160 } }}>
-          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Chips</InputLabel>
-          <Select
-            multiple
-            value={filters.chips}
-            label="Chips"
-            onChange={handleMultiSelectChange('chips')}
-            input={<OutlinedInput label="Chips" />}
-            renderValue={(selected) => {
-              if (selected.length === 0) {
-                return 'All Chips';
-              }
-              if (selected.length === filterOptions.chips.length) {
-                return 'All Chips';
-              }
-              if (selected.length <= 2) {
-                return selected.join(', ');
-              }
-              return `${selected.slice(0, 2).join(', ')} + ${selected.length - 2} more`;
-            }}
-            sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
-          >
-            {filterOptions.chips.length > 0 ? (
-              [
-                <MenuItem
-                  key="all"
-                  value=""
-                  sx={{ fontSize: 12, fontWeight: 'bold' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    <input
-                      type="checkbox"
-                      checked={filters.chips.length === 0}
-                      readOnly
-                      style={{ marginRight: 8 }}
-                    />
-                    All
-                  </Box>
-                </MenuItem>,
-                ...filterOptions.chips.map((chip) => (
-                  <MenuItem key={chip} value={chip} sx={{ fontSize: 12 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <input
-                        type="checkbox"
-                        checked={filters.chips.includes(chip)}
-                        readOnly
-                        style={{ marginRight: 8 }}
-                      />
-                      {chip}
-                    </Box>
-                  </MenuItem>
-                ))
-              ]
-            ) : (
-              <MenuItem value="" disabled>
-                No chips available
-              </MenuItem>
-            )}
-          </Select>
-        </FormControl>
+        {/* Filter Section */}
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Typography variant="h6">Filters:</Typography>
 
-        <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 80, md: 120 }, maxWidth: { xs: 140, md: 160 } }}>
-          <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Precisions</InputLabel>
-          <Select
-            multiple
-            value={filters.precisions}
-            label="Precisions"
-            onChange={handleMultiSelectChange('precisions')}
-            input={<OutlinedInput label="Precisions" />}
-            renderValue={(selected) => {
-              if (selected.length === 0) {
-                return 'All Precisions';
-              }
-              if (selected.length === filterOptions.precisions.length) {
-                return 'All Precisions';
-              }
-              if (selected.length <= 2) {
-                return selected.map(p => p.toUpperCase()).join(', ');
-              }
-              return `${selected.slice(0, 2).map(p => p.toUpperCase()).join(', ')} + ${selected.length - 2} more`;
-            }}
-            sx={{ fontSize: { xs: 11, md: 12 }, minHeight: { xs: 28, md: 32 } }}
-          >
-            {filterOptions.precisions.length > 0 ? (
-              [
-                <MenuItem
-                  key="all"
-                  value=""
-                  sx={{ fontSize: 12, fontWeight: 'bold' }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    <input
-                      type="checkbox"
-                      checked={filters.precisions.length === 0}
-                      readOnly
-                      style={{ marginRight: 8 }}
-                    />
-                    All
-                  </Box>
-                </MenuItem>,
-                ...filterOptions.precisions.map((precision) => (
-                  <MenuItem key={precision} value={precision} sx={{ fontSize: 12 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <input
-                        type="checkbox"
-                        checked={filters.precisions.includes(precision)}
-                        readOnly
-                        style={{ marginRight: 8 }}
-                      />
-                      {precision.toUpperCase()}
-                    </Box>
-                  </MenuItem>
-                ))
-              ]
-            ) : (
-              <MenuItem value="" disabled>
-                No precisions available
-              </MenuItem>
-            )}
-          </Select>
-        </FormControl>
+          {/* Tensor Parallelism Filter */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Tensor Parallelism</InputLabel>
+            <Select
+              multiple
+              value={filters.tensorParallelisms}
+              onChange={handleMultiSelectChange('tensorParallelisms')}
+              input={<OutlinedInput label="Tensor Parallelism" />}
+              renderValue={(selected) => (
+                selected.length > 1
+                  ? `${selected.length} selected`
+                  : selected.length === 1
+                    ? <Chip key={selected[0]} label={`TP:${selected[0]}`} size="small" sx={softBlueChipSx} />
+                    : null
+              )}
+            >
+              {filterOptions.tensorParallelisms.map((tp) => (
+                <MenuItem key={tp} value={tp}>
+                  <Checkbox checked={filters.tensorParallelisms.includes(tp)} />
+                  <ListItemText primary={`TP:${tp}`} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Chip Filter */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Chips</InputLabel>
+            <Select
+              multiple
+              value={filters.chips}
+              onChange={handleMultiSelectChange('chips')}
+              input={<OutlinedInput label="Chips" />}
+              renderValue={(selected) => (
+                selected.length > 1
+                  ? `${selected.length} selected`
+                  : selected.length === 1
+                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={softBlueChipSx} />
+                    : null
+              )}
+            >
+              {filterOptions.chips.map((chip) => (
+                <MenuItem key={chip} value={chip}>
+                  <Checkbox checked={filters.chips.includes(chip)} />
+                  <ListItemText primary={chip} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Precision Filter */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Precisions</InputLabel>
+            <Select
+              multiple
+              value={filters.precisions}
+              onChange={handleMultiSelectChange('precisions')}
+              input={<OutlinedInput label="Precisions" />}
+              renderValue={(selected) => (
+                selected.length > 1
+                  ? `${selected.length} selected`
+                  : selected.length === 1
+                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={softBlueChipSx} />
+                    : null
+              )}
+            >
+              {filterOptions.precisions.map((precision) => (
+                <MenuItem key={precision} value={precision}>
+                  <Checkbox checked={filters.precisions.includes(precision)} />
+                  <ListItemText primary={precision} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
 
         <Box sx={{ flexGrow: 1, minWidth: { xs: 8, md: 16 } }} />
 
@@ -552,7 +538,7 @@ export default function Dashboard() {
           lineHeight: 1.2
         }}>
           {activeTab === 0
-            ? `${tableFilteredData.length} of ${modelData.length} results`
+            ? `${tableFilteredData.length} of ${modelData?.length || 0} results`
             : `Showing ${Math.min(page * rowsPerPage + 1, tableData.length)}-${Math.min((page + 1) * rowsPerPage, tableData.length)} of ${tableData.length} results`
           }
         </Typography>
@@ -700,7 +686,7 @@ export default function Dashboard() {
               </Box>
 
               {/* Chart Content */}
-              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                 {chartData.length === 0 || chartData.every(series => series.data.length === 0) ? (
                   <Box sx={{
                     display: 'flex',
@@ -719,7 +705,7 @@ export default function Dashboard() {
                     </Typography>
                   </Box>
                 ) : (
-                  <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' } }}>
+                  <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative' }}>
                     <ResponsiveLine
                       data={chartData}
                       margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
@@ -761,38 +747,48 @@ export default function Dashboard() {
                         legendPosition: 'middle',
                         legendOffset: -60
                       }}
-                      legends={[
-                        {
-                          anchor: 'bottom-right',
-                          direction: 'column',
-                          justify: false,
-                          translateX: 50,
-                          translateY: 0,
-                          itemWidth: 80,
-                          itemHeight: 14,
-                          itemsSpacing: 6,
-                          itemDirection: 'left-to-right',
-                          symbolSize: 12,
-                          symbolShape: 'circle',
-                          effects: [
-                            {
-                              on: 'hover',
-                              style: {
-                                itemOpacity: 1
-                              }
-                            }
-                          ]
-                        }
-                      ]}
+                      legends={[]}
                       tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                         <ChartTooltip
                           point={point}
-                          selectedModel={selectedModel}
                           xMetric={xMetric}
                           yMetric={yMetric}
                         />
                       )}
                     />
+                    {/* Custom Legend Box */}
+                    <Box sx={{
+                      position: 'absolute',
+                      right: 16,
+                      bottom: 80,
+                      zIndex: 10,
+                      bgcolor: 'background.paper',
+                      border: 1,
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      boxShadow: 2,
+                      px: 2,
+                      py: 1,
+                      minWidth: 120,
+                      maxWidth: 220,
+                      fontSize: 12,
+                    }}>
+                      {chartData.map((series, idx) => (
+                        <Box key={series.id} sx={{ display: 'flex', alignItems: 'center', mb: idx !== chartData.length - 1 ? 0.5 : 0 }}>
+                          <Box sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: customColors[idx % customColors.length],
+                            mr: 1,
+                            flexShrink: 0
+                          }} />
+                          <Typography sx={{ fontSize: 12, color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {series.id}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
                   </Box>
                 )}
               </Box>
@@ -901,8 +897,8 @@ export default function Dashboard() {
                       <TableCell sx={{ fontSize: 11 }}>{row.input_sequence_length}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.output_sequence_length}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.concurrency}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.tps.toFixed(2)}</TableCell>
-                      <TableCell sx={{ fontSize: 11 }}>{row.ttft_ms.toFixed(2)}</TableCell>
+                      <TableCell sx={{ fontSize: 11 }}>{row.output_token_throughput_tok_s.toFixed(2)}</TableCell>
+                      <TableCell sx={{ fontSize: 11 }}>{row.ttft_mean_ms.toFixed(2)}</TableCell>
                       <TableCell sx={{ fontSize: 11 }}>{row.successful_requests}</TableCell>
                     </TableRow>
                   ))}
@@ -928,7 +924,7 @@ export default function Dashboard() {
                   minHeight: { xs: 42, md: 52 }
                 },
                 '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                  fontSize: { xs: 11, md: 14 }
+                  fontSize: { xs: 11, md: 12 }
                 }
               }}
             />

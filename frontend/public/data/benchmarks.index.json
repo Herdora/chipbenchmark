@@ -1,36 +1,157 @@
 {
-  "lastUpdated": "2025-07-15T01:20:30.505Z",
+  "lastUpdated": "2025-07-16T02:10:01.480Z",
   "benchmarks": [
     {
-      "model": "Llama-3.1-8B-Instruct",
-      "chip": "A100",
-      "precision": "BF16",
-      "dataPoints": 20,
-      "path": "benchmarks/Llama-3.1-8B-Instruct/A100/BF16/data.json",
-      "hasHardwareData": true
-    },
-    {
-      "model": "Llama-3.1-8B-Instruct",
-      "chip": "H100",
-      "precision": "BF16",
-      "dataPoints": 20,
-      "path": "benchmarks/Llama-3.1-8B-Instruct/H100/BF16/data.json",
-      "hasHardwareData": true
-    },
-    {
-      "model": "Llama-3.1-8B-Instruct",
-      "chip": "L40S",
-      "precision": "BF16",
-      "dataPoints": 19,
-      "path": "benchmarks/Llama-3.1-8B-Instruct/L40S/BF16/data.json",
-      "hasHardwareData": true
-    },
-    {
-      "model": "Llama-3.1-8B-Instruct",
+      "model": "Llama-3.1-70B-Instruct",
+      "tensorParallelism": "2",
       "chip": "MI300X",
       "precision": "BF16",
       "dataPoints": 20,
-      "path": "benchmarks/Llama-3.1-8B-Instruct/MI300X/BF16/data.json",
+      "path": "benchmarks/Llama-3.1-70B-Instruct/2/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-70B-Instruct",
+      "tensorParallelism": "4",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-70B-Instruct/4/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-70B-Instruct",
+      "tensorParallelism": "4",
+      "chip": "MI300X",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-70B-Instruct/4/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "tensorParallelism": "1",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/1/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "tensorParallelism": "1",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/1/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "tensorParallelism": "1",
+      "chip": "L40S",
+      "precision": "BF16",
+      "dataPoints": 19,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/1/L40S/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "tensorParallelism": "1",
+      "chip": "MI300X",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/1/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-8B-Instruct",
+      "tensorParallelism": "4",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-3.1-8B-Instruct/4/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-4-Scout-17B-16E",
+      "tensorParallelism": "4",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-4-Scout-17B-16E/4/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-4-Scout-17B-16E",
+      "tensorParallelism": "4",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-4-Scout-17B-16E/4/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-4-Scout-17B-16E",
+      "tensorParallelism": "4",
+      "chip": "MI300X",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Llama-4-Scout-17B-16E/4/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen2-7B",
+      "tensorParallelism": "1",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen2-7B/1/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen2-7B",
+      "tensorParallelism": "1",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen2-7B/1/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen2-7B",
+      "tensorParallelism": "2",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen2-7B/2/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen3-14B",
+      "tensorParallelism": "1",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen3-14B/1/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen3-14B",
+      "tensorParallelism": "1",
+      "chip": "H100",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen3-14B/1/H100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen3-14B",
+      "tensorParallelism": "1",
+      "chip": "MI300X",
+      "precision": "BF16",
+      "dataPoints": 20,
+      "path": "benchmarks/Qwen3-14B/1/MI300X/BF16/data.json",
       "hasHardwareData": true
     }
   ]

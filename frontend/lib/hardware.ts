@@ -5,43 +5,54 @@ interface HardwareInfo {
   [key: string]: unknown;
 }
 
-// Cache for hardware data
+// Cache for hardware information
 const hardwareCache = new Map<string, HardwareInfo | null>();
 
 /**
- * Fetches hardware information for a specific model/chip/precision combination
+ * Creates a cache key for hardware information
  */
-export async function fetchHardwareInfo(model: string, chip: string, precision: string): Promise<HardwareInfo | null> {
-  const cacheKey = `${model}/${chip}/${precision}`;
+function createHardwareKey(model: string, tensorParallelism: string, chip: string, precision: string): string {
+  return `${model}/${tensorParallelism}/${chip}/${precision}`;
+}
+
+/**
+ * Fetches hardware information for a specific benchmark configuration
+ */
+export async function fetchHardwareInfo(model: string, tensorParallelism: string, chip: string, precision: string): Promise<HardwareInfo | null> {
+  const cacheKey = createHardwareKey(model, tensorParallelism, chip, precision);
 
   // Check cache first
   if (hardwareCache.has(cacheKey)) {
-    return hardwareCache.get(cacheKey)!;
+    return hardwareCache.get(cacheKey) || null;
   }
 
   try {
-    const response = await fetch(`/data/benchmarks/${model}/${chip}/${precision.toUpperCase()}/hardware.json`);
+    const url = `/api/benchmarks/${encodeURIComponent(model)}/${encodeURIComponent(tensorParallelism)}/${encodeURIComponent(chip)}/${encodeURIComponent(precision)}/hardware.json`;
+    const response = await fetch(url);
+
     if (!response.ok) {
-      // Hardware data not available for this configuration
+      console.warn(`Hardware info not available for ${model}/${tensorParallelism}/${chip}/${precision}`);
       hardwareCache.set(cacheKey, null);
       return null;
     }
 
-    const hardwareData = await response.json();
-    hardwareCache.set(cacheKey, hardwareData);
-    return hardwareData;
+    const hardwareInfo = await response.json() as HardwareInfo;
+    hardwareCache.set(cacheKey, hardwareInfo);
+    return hardwareInfo;
   } catch (error) {
-    console.warn(`Failed to fetch hardware info for ${cacheKey}:`, error);
+    console.error(`Error fetching hardware info for ${model}/${tensorParallelism}/${chip}/${precision}:`, error);
     hardwareCache.set(cacheKey, null);
     return null;
   }
 }
 
 /**
- * Formats hardware information into a readable string
+ * Formats hardware information for display
  */
 export function formatHardwareInfo(hardwareInfo: HardwareInfo | null): string {
-  if (!hardwareInfo) return '';
+  if (!hardwareInfo) {
+    return 'Hardware info not available';
+  }
 
   const parts: string[] = [];
 
@@ -50,23 +61,39 @@ export function formatHardwareInfo(hardwareInfo: HardwareInfo | null): string {
   }
 
   if (hardwareInfo.type) {
-    parts.push(hardwareInfo.type);
+    parts.push(`(${hardwareInfo.type})`);
   }
 
   if (hardwareInfo.memory) {
-    parts.push(hardwareInfo.memory);
+    parts.push(`${hardwareInfo.memory} memory`);
   }
 
-  return parts.join(' • ');
+  return parts.length > 0 ? parts.join(' ') : 'Hardware info not available';
 }
 
 /**
  * Preloads hardware data for multiple configurations
  */
-export async function preloadHardwareData(configurations: Array<{ model: string, chip: string, precision: string; }>) {
+export async function preloadHardwareData(configurations: Array<{ model: string, tensorParallelism: string, chip: string, precision: string; }>) {
   const promises = configurations.map(config =>
-    fetchHardwareInfo(config.model, config.chip, config.precision)
+    fetchHardwareInfo(config.model, config.tensorParallelism, config.chip, config.precision)
   );
 
-  await Promise.all(promises);
+  // Wait for all requests to complete (ignoring failures)
+  await Promise.allSettled(promises);
+}
+
+/**
+ * Clears the hardware cache
+ */
+export function clearHardwareCache() {
+  hardwareCache.clear();
+}
+
+/**
+ * Gets cached hardware info without making a network request
+ */
+export function getCachedHardwareInfo(model: string, tensorParallelism: string, chip: string, precision: string): HardwareInfo | null | undefined {
+  const cacheKey = createHardwareKey(model, tensorParallelism, chip, precision);
+  return hardwareCache.get(cacheKey);
 } 

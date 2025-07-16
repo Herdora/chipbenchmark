@@ -70,15 +70,15 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
                 const jsonString = fs.readFileSync(fullItemPath, 'utf8');
                 const data = safeJsonParse(jsonString, fullItemPath);
 
-                // Extract model, chip, precision from the path
+                // Extract model, tensorParallelism, chip, precision from the path
                 const pathParts = relativePath.split(path.sep);
-                if (pathParts.length >= 3) {
-                    const [model, chip, precision] = pathParts;
+                if (pathParts.length >= 4) {
+                    const [model, tensorParallelism, chip, precision] = pathParts;
 
                     // Check for hardware.json in the same directory
                     const hardwareJsonPath = path.join(path.dirname(fullItemPath), 'hardware.json');
                     let hardwareData = null;
-                    
+
                     if (fs.existsSync(hardwareJsonPath)) {
                         try {
                             const hardwareJsonString = fs.readFileSync(hardwareJsonPath, 'utf8');
@@ -90,6 +90,7 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
 
                     results.push({
                         model,
+                        tensorParallelism,
                         chip,
                         precision,
                         path: relativePath,
@@ -99,7 +100,7 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
                         hardwareSourcePath: hardwareData ? hardwareJsonPath : null
                     });
 
-                    console.log(`✓ Found benchmark: ${model}/${chip}/${precision} (${data.length} data points)`);
+                    console.log(`✓ Found benchmark: ${model}/${tensorParallelism}/${chip}/${precision} (${data.length} data points)`);
                 }
             } catch (error) {
                 console.error(`✗ Error loading ${fullItemPath}:`, error.message);
@@ -112,10 +113,10 @@ function traverseBenchmarkDirectories(baseDir, relativePath = '') {
 
 // Function to copy benchmark data to frontend structure
 function copyBenchmarkData(benchmarkInfo) {
-    const { model, chip, precision, data, hardwareData, sourcePath, hardwareSourcePath } = benchmarkInfo;
+    const { model, tensorParallelism, chip, precision, data, hardwareData, sourcePath, hardwareSourcePath } = benchmarkInfo;
 
     // Create target directory structure
-    const targetDir = path.join(frontendBenchmarksDir, model, chip, precision);
+    const targetDir = path.join(frontendBenchmarksDir, model, tensorParallelism, chip, precision);
     if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
     }
@@ -124,17 +125,18 @@ function copyBenchmarkData(benchmarkInfo) {
     const targetPath = path.join(targetDir, 'data.json');
     fs.writeFileSync(targetPath, JSON.stringify(data, null, 2));
 
-    console.log(`✓ Copied: ${model}/${chip}/${precision}/data.json`);
+    console.log(`✓ Copied: ${model}/${tensorParallelism}/${chip}/${precision}/data.json`);
 
     // Copy hardware.json file if it exists
     if (hardwareData && hardwareSourcePath) {
         const hardwareTargetPath = path.join(targetDir, 'hardware.json');
         fs.writeFileSync(hardwareTargetPath, JSON.stringify(hardwareData, null, 2));
-        console.log(`✓ Copied: ${model}/${chip}/${precision}/hardware.json`);
+        console.log(`✓ Copied: ${model}/${tensorParallelism}/${chip}/${precision}/hardware.json`);
     }
 
     return {
         model,
+        tensorParallelism,
         chip,
         precision,
         dataPoints: data.length,
@@ -149,10 +151,11 @@ function createIndexFile(copiedBenchmarks) {
         lastUpdated: new Date().toISOString(),
         benchmarks: copiedBenchmarks.map(b => ({
             model: b.model,
+            tensorParallelism: b.tensorParallelism,
             chip: b.chip,
             precision: b.precision,
             dataPoints: b.dataPoints,
-            path: `benchmarks/${b.model}/${b.chip}/${b.precision}/data.json`,
+            path: `benchmarks/${b.model}/${b.tensorParallelism}/${b.chip}/${b.precision}/data.json`,
             hasHardwareData: b.hasHardwareData
         }))
     };

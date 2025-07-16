@@ -1,59 +1,82 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
+  BenchmarkResult,
+  BenchmarkIndex,
+  BenchmarkDataFile,
+  BenchmarkMetadata,
+  validateIndex,
   validateDataFile,
   convertToFrontendFormat,
-  type BenchmarkResult,
-  type BenchmarkDataFile,
-  AVAILABLE_MODELS,
-  AVAILABLE_CHIPS,
-  AVAILABLE_PRECISIONS,
   filterBenchmarkResults
 } from '@/lib/schemas/benchmark';
 
-// Types for the benchmark discovery API
+// Enhanced benchmark structure with tensor parallelism
 interface BenchmarkStructure {
   model: string;
+  tensorParallelism: string;
   chip: string;
   precision: string;
   hasData: boolean;
 }
 
+// Enhanced benchmark discovery
 interface BenchmarkDiscovery {
   models: string[];
+  tensorParallelisms: string[];
   chips: string[];
   precisions: string[];
   structure: BenchmarkStructure[];
 }
 
-// Hook to load available benchmarks dynamically
+/**
+ * Hook for discovering available benchmark configurations
+ */
 export function useBenchmarkDiscovery() {
   const [discovery, setDiscovery] = useState<BenchmarkDiscovery | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDiscovery = async () => {
       try {
-        const response = await fetch('/api/benchmarks');
-        if (response.ok) {
-          const data = await response.json();
-          setDiscovery(data);
+        setLoading(true);
+        setError(null);
 
-          // Update global constants
-          AVAILABLE_MODELS.length = 0;
-          AVAILABLE_MODELS.push(...data.models);
-          AVAILABLE_CHIPS.length = 0;
-          AVAILABLE_CHIPS.push(...data.chips);
-          AVAILABLE_PRECISIONS.length = 0;
-          AVAILABLE_PRECISIONS.push(...data.precisions);
-        } else {
-          console.error('Failed to load benchmark discovery');
-          setDiscovery({ models: [], chips: [], precisions: [], structure: [] });
+        const response = await fetch('/api/benchmarks');
+        if (!response.ok) {
+          throw new Error(`Failed to load benchmark index: ${response.statusText}`);
         }
-      } catch (error) {
-        console.error('Error loading benchmark discovery:', error);
-        setDiscovery({ models: [], chips: [], precisions: [], structure: [] });
+
+        const rawIndex = await response.json();
+        const index = validateIndex(rawIndex);
+
+        // Extract unique values for filters
+        const models = Array.from(new Set(index.benchmarks.map(b => b.model))).sort();
+        const tensorParallelisms = Array.from(new Set(index.benchmarks.map(b => b.tensorParallelism))).sort();
+        const chips = Array.from(new Set(index.benchmarks.map(b => b.chip))).sort();
+        const precisions = Array.from(new Set(index.benchmarks.map(b => b.precision))).sort();
+
+        // Create structure array
+        const structure: BenchmarkStructure[] = index.benchmarks.map(b => ({
+          model: b.model,
+          tensorParallelism: b.tensorParallelism,
+          chip: b.chip,
+          precision: b.precision,
+          hasData: b.dataPoints > 0
+        }));
+
+        setDiscovery({
+          models,
+          tensorParallelisms,
+          chips,
+          precisions,
+          structure
+        });
+      } catch (err) {
+        console.error('Error loading benchmark discovery:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load benchmark discovery');
       } finally {
         setLoading(false);
       }
@@ -62,168 +85,240 @@ export function useBenchmarkDiscovery() {
     loadDiscovery();
   }, []);
 
-  return { discovery, loading };
+  return { discovery, loading, error };
 }
 
-// Load benchmark data for a specific model/chip/precision combination
-const loadBenchmarkDataFile = async (model: string, chip: string, precision: string): Promise<BenchmarkResult[]> => {
-  try {
-    const response = await fetch(`/api/benchmarks/${model}/${chip}/${precision}/data.json`);
+/**
+ * Load benchmark data for a specific configuration
+ */
+const loadBenchmarkDataFile = async (model: string, tensorParallelism: string, chip: string, precision: string): Promise<BenchmarkResult[]> => {
+  const url = `/api/benchmarks/${encodeURIComponent(model)}/${encodeURIComponent(tensorParallelism)}/${encodeURIComponent(chip)}/${encodeURIComponent(precision)}/data.json`;
 
+  const response = await fetch(url);
     if (!response.ok) {
-      console.warn(`Failed to load data for ${model}/${chip}/${precision}: ${response.status}`);
-      return [];
+    throw new Error(`Failed to load data for ${model}/${tensorParallelism}/${chip}/${precision}: ${response.statusText}`);
     }
 
-    const data = await response.json();
+  const rawData = await response.json();
+  const dataFile = validateDataFile(rawData);
 
-    try {
-      const validatedData = validateDataFile(data);
       // Convert to frontend format
-      return validatedData.map(dataPoint => convertToFrontendFormat(dataPoint, chip, precision));
-    } catch (validationError) {
-      console.error('Validation failed for', model, chip, precision, ':', validationError);
-      // Try to convert raw data anyway
-      return data.map((dataPoint: any) => convertToFrontendFormat(dataPoint, chip, precision));
-    }
-  } catch (error) {
-    console.error(`Error loading benchmark data for ${model}/${chip}/${precision}:`, error);
-    return [];
-  }
+  return dataFile.map(dataPoint =>
+    convertToFrontendFormat(dataPoint, tensorParallelism, chip, precision)
+  );
 };
 
-// Load all available benchmark data using discovered structure
+/**
+ * Load all benchmark data from multiple configurations
+ */
 const loadAllBenchmarkData = async (structure: BenchmarkStructure[]): Promise<BenchmarkResult[]> => {
-  const allData: BenchmarkResult[] = [];
+  const results: BenchmarkResult[] = [];
 
-  for (const item of structure) {
-    if (item.hasData) {
-      const data = await loadBenchmarkDataFile(item.model, item.chip, item.precision);
-      allData.push(...data);
+  for (const config of structure) {
+    if (config.hasData) {
+      try {
+        const configResults = await loadBenchmarkDataFile(config.model, config.tensorParallelism, config.chip, config.precision);
+        results.push(...configResults);
+      } catch (error) {
+        console.warn(`Failed to load data for ${config.model}/${config.tensorParallelism}/${config.chip}/${config.precision}:`, error);
+      }
     }
   }
 
-  return allData;
+  return results;
 };
 
+/**
+ * Hook for loading all benchmark data
+ */
 export function useBenchmarkData() {
-  const [results, setResults] = useState<BenchmarkResult[]>([]);
+  const [data, setData] = useState<BenchmarkResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const { discovery, loading: discoveryLoading } = useBenchmarkDiscovery();
+  const [error, setError] = useState<string | null>(null);
+  const { discovery, loading: discoveryLoading, error: discoveryError } = useBenchmarkDiscovery();
 
   useEffect(() => {
     if (discoveryLoading || !discovery) return;
 
-    loadAllBenchmarkData(discovery.structure).then(data => {
-      setResults(data);
+    const loadAllData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const results = await loadAllBenchmarkData(discovery.structure);
+        setData(results);
+      } catch (err) {
+        console.error('Error loading benchmark data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load benchmark data');
+      } finally {
       setLoading(false);
-    }).catch(error => {
-      console.error('Error in data loading:', error);
-      setResults([]);
-      setLoading(false);
-    });
+      }
+    };
+
+    loadAllData();
   }, [discovery, discoveryLoading]);
 
-  return { results, loading: loading || discoveryLoading };
+  return {
+    data,
+    loading: loading || discoveryLoading,
+    error: error || discoveryError,
+    discovery
+  };
 }
 
-// Hook for model-centric data loading
+/**
+ * Hook for loading benchmark data for a specific model
+ */
 export function useModelBenchmarkData(selectedModel: string) {
-  const [results, setResults] = useState<BenchmarkResult[]>([]);
+  const [data, setData] = useState<BenchmarkResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const { discovery, loading: discoveryLoading } = useBenchmarkDiscovery();
+  const [error, setError] = useState<string | null>(null);
+  const { discovery, loading: discoveryLoading, error: discoveryError } = useBenchmarkDiscovery();
 
   useEffect(() => {
-    if (discoveryLoading || !discovery || !selectedModel) {
-      setResults([]);
-      setLoading(!selectedModel ? false : discoveryLoading);
-      return;
-    }
+    if (discoveryLoading || !discovery || !selectedModel) return;
 
     const loadModelData = async () => {
+      try {
       setLoading(true);
-      const allData: BenchmarkResult[] = [];
+        setError(null);
 
       // Filter structure for the selected model
-      const modelStructures = discovery.structure.filter(
-        item => item.model === selectedModel && item.hasData
-      );
+        const modelStructure = discovery.structure.filter(s => s.model === selectedModel);
 
-      for (const item of modelStructures) {
-        const data = await loadBenchmarkDataFile(item.model, item.chip, item.precision);
-        allData.push(...data);
+        const results = await loadAllBenchmarkData(modelStructure);
+        setData(results);
+      } catch (err) {
+        console.error('Error loading model benchmark data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load model benchmark data');
+      } finally {
+        setLoading(false);
       }
-
-      setResults(allData);
-      setLoading(false);
     };
 
     loadModelData();
   }, [selectedModel, discovery, discoveryLoading]);
 
-  return { results, loading: loading || discoveryLoading };
+  return {
+    data,
+    loading: loading || discoveryLoading,
+    error: error || discoveryError,
+    discovery
+  };
 }
 
-// Hook for filtering and computing derived data
+/**
+ * Hook for filtering benchmark data
+ */
 export function useFilteredBenchmarkData(
   data: BenchmarkResult[],
   filters?: {
+    models?: string[];
+    tensorParallelisms?: string[];
     chips?: string[];
     precisions?: string[];
     concurrencies?: number[];
+    ioConfigs?: string[];
   }
 ) {
-  return useMemo(() => {
-    if (!filters) return data;
+  const [filteredData, setFilteredData] = useState<BenchmarkResult[]>([]);
 
-    return filterBenchmarkResults(data, {
-      chips: filters.chips,
-      precisions: filters.precisions,
-      concurrencies: filters.concurrencies
-    });
+  useEffect(() => {
+    if (!data || !Array.isArray(data)) {
+      setFilteredData([]);
+      return;
+    }
+
+    if (!filters) {
+      setFilteredData(data);
+      return;
+    }
+
+    const filtered = filterBenchmarkResults(data, filters);
+    setFilteredData(filtered);
   }, [data, filters]);
+
+  return filteredData;
 }
 
-// Hook for getting available filter options from data
+/**
+ * Hook for extracting unique filter options from data
+ */
 export function useFilterOptions(data: BenchmarkResult[]) {
-  return useMemo(() => {
+  const [options, setOptions] = useState({
+    models: [] as string[],
+    tensorParallelisms: [] as string[],
+    chips: [] as string[],
+    precisions: [] as string[],
+    concurrencies: [] as number[],
+    ioConfigs: [] as string[]
+  });
+
+  useEffect(() => {
+    if (!data || !Array.isArray(data)) {
+      setOptions({
+        models: [],
+        tensorParallelisms: [],
+        chips: [],
+        precisions: [],
+        concurrencies: [],
+        ioConfigs: []
+      });
+      return;
+    }
+
     const models = Array.from(new Set(data.map(d => d.model))).sort();
+    const tensorParallelisms = Array.from(new Set(data.map(d => d.tensorParallelism))).sort();
     const chips = Array.from(new Set(data.map(d => d.chip))).sort();
     const precisions = Array.from(new Set(data.map(d => d.precision))).sort();
     const concurrencies = Array.from(new Set(data.map(d => d.concurrency))).sort((a, b) => a - b);
+    const ioConfigs = Array.from(new Set(data.map(d => d.io_config))).sort();
 
-    return { models, chips, precisions, concurrencies };
+    setOptions({
+      models,
+      tensorParallelisms,
+      chips,
+      precisions,
+      concurrencies,
+      ioConfigs
+    });
   }, [data]);
+
+  return options;
 }
 
+/**
+ * Hook for computing KPIs from benchmark data
+ */
 export function useBenchmarkKPIs(data: BenchmarkResult[]) {
-  return useMemo(() => {
+  const [kpis, setKpis] = useState({
+    maxThroughput: 0,
+    avgLatency: 0,
+    totalConfigurations: 0,
+    uniqueModels: 0
+  });
+
+  useEffect(() => {
     if (data.length === 0) {
-      return {
-        avgThroughput: 0,
-        avgLatency: 0,
-        totalRequests: 0,
-        avgPower: 0
-      };
+      setKpis({ maxThroughput: 0, avgLatency: 0, totalConfigurations: 0, uniqueModels: 0 });
+      return;
     }
 
     const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
     const avg = (arr: number[]): number => arr.length > 0 ? sum(arr) / arr.length : 0;
 
-    const throughputs = data.map(d => d.tps);
-    const latencies = data.map(d => d.ttft_ms);
-    const requests = data.map(d => d.successful_requests);
-    const powers = data.map(d => d.power_w_avg).filter(p => p !== undefined) as number[];
+    const maxThroughput = Math.max(...data.map(d => d.output_token_throughput_tok_s));
+    const avgLatency = avg(data.map(d => d.ttft_mean_ms));
+    const totalConfigurations = data.length;
+    const uniqueModels = new Set(data.map(d => d.model)).size;
 
-    return {
-      avgThroughput: avg(throughputs),
-      avgLatency: avg(latencies),
-      totalRequests: sum(requests),
-      avgPower: powers.length > 0 ? avg(powers) : 0
-    };
+    setKpis({
+      maxThroughput,
+      avgLatency,
+      totalConfigurations,
+      uniqueModels
+    });
   }, [data]);
-}
 
-// Export constants and types for use in components
-export { AVAILABLE_MODELS, AVAILABLE_CHIPS, AVAILABLE_PRECISIONS };
-export type { BenchmarkStructure, BenchmarkDiscovery }; 
+  return kpis;
+}

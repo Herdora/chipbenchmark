@@ -53,14 +53,14 @@ export default function RootLayout({
                 borderBottom: 1,
                 padding: 0,
                 borderColor: 'divider',
-                height: { xs: 56, md: 72 },
-                minHeight: { xs: 56, md: 72 },
+                height: { xs: 56, md: 64 },
+                minHeight: { xs: 56, md: 64 },
               }}
             >
               <Container sx={{ height: '100%', px: { xs: 1, md: 0 }, py: 0, minWidth: "100%" }}>
                 <Toolbar disableGutters sx={{
-                  height: { xs: 56, md: 72 },
-                  minHeight: { xs: 56, md: 72 },
+                  height: { xs: 56, md: 64 },
+                  minHeight: { xs: 56, md: 64 },
                   py: 0,
                   px: { xs: 1, md: 0 }
                 }}>
@@ -74,7 +74,9 @@ export default function RootLayout({
                       style={{
                         objectFit: 'contain',
                         width: 'auto',
-                        height: 'auto'
+                        height: 'auto',
+                        maxWidth: 36,
+                        maxHeight: 36
                       }}
                     />
                     <Box>
@@ -153,8 +155,8 @@ export default function RootLayout({
                 height: 'calc(100dvh - 56px)',
                 fallbacks: { height: 'calc(100vh - 56px)' }, // Fallback for older browsers
                 '@media (min-width: 900px)': {
-                  height: 'calc(100dvh - 72px)',
-                  fallbacks: { height: 'calc(100vh - 72px)' }
+                  height: 'calc(100dvh - 64px)',
+                  fallbacks: { height: 'calc(100vh - 64px)' }
                 },
                 overflow: 'hidden',
                 width: '100%'
