@@ -6,7 +6,6 @@ CONTAINER_DIR="/vllm-workspace"
 
 echo ">>> Starting Docker container"
 echo ">>> Mounting: $CURRENT_DIR -> $CONTAINER_DIR"
-echo ">>> Installing tmux in container..."
 
 docker run -it \
   --entrypoint bash \
@@ -18,6 +17,6 @@ docker run -it \
   -v "$CURRENT_DIR:$CONTAINER_DIR" \
   -w "$CONTAINER_DIR" \
   "$DOCKER_IMAGE" \
-  -c "apt-get update && apt-get install -y tmux && bash"
+  -c "bash"
   
  
