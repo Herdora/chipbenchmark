@@ -66,6 +66,8 @@ function ChartTooltip({ point, xMetric, yMetric }: {
       chip: string;
       precision: string;
       tensorParallelism: string;
+      x: number;
+      y: number;
       [key: string]: string | number | undefined;
     };
   };
@@ -80,10 +82,10 @@ function ChartTooltip({ point, xMetric, yMetric }: {
         {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
       </Typography>
       <Typography variant="body2">
-        {xMetric}: {data[xMetric]}
+        {xMetric}: {data.x}
       </Typography>
       <Typography variant="body2">
-        {yMetric}: {data[yMetric]}
+        {yMetric}: {data.y}
       </Typography>
     </Box>
   );
@@ -178,13 +180,13 @@ export default function Dashboard() {
   }, [ioOptions, chartIoConfig]);
 
   // Apply filters and restrict to specific concurrency values
-  const ALLOWED_CONCURRENCIES = [1, 64, 128, 256];
+  const ALLOWED_CONCURRENCIES = useMemo(() => [1, 64, 128, 256], []);
   const memoizedFilters = useMemo(() => ({
     tensorParallelisms: filters.tensorParallelisms,
     chips: filters.chips,
     precisions: filters.precisions,
     concurrencies: ALLOWED_CONCURRENCIES
-  }), [filters.tensorParallelisms, filters.chips, filters.precisions]);
+  }), [filters.tensorParallelisms, filters.chips, filters.precisions, ALLOWED_CONCURRENCIES]);
 
   const filteredData = useFilteredBenchmarkData(modelData, memoizedFilters);
 

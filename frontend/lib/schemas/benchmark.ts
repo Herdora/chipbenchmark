@@ -260,28 +260,28 @@ export function validateBenchmarkResult(data: unknown): BenchmarkResult {
  * Type guard for model names
  */
 export function isValidModel(value: string): value is ModelName {
-  return SUPPORTED_MODELS.includes(value as any);
+  return SUPPORTED_MODELS.includes(value as ModelName);
 }
 
 /**
  * Type guard for tensor parallelism values
  */
 export function isValidTensorParallelism(value: string): value is TensorParallelismValue {
-  return SUPPORTED_TENSOR_PARALLELISMS.includes(value as any);
+  return SUPPORTED_TENSOR_PARALLELISMS.includes(value as TensorParallelismValue);
 }
 
 /**
  * Type guard for chip names
  */
 export function isValidChip(value: string): value is ChipName {
-  return SUPPORTED_CHIPS.includes(value as any);
+  return SUPPORTED_CHIPS.includes(value as ChipName);
 }
 
 /**
  * Type guard for precision types
  */
 export function isValidPrecision(value: string): value is PrecisionType {
-  return SUPPORTED_PRECISIONS.includes(value as any);
+  return SUPPORTED_PRECISIONS.includes(value as PrecisionType);
 }
 
 /**
