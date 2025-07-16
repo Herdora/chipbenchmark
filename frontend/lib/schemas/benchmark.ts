@@ -144,7 +144,7 @@ export const SUPPORTED_PRECISIONS = [
   'BF16', 'FP8', 'FP16', 'INT8'
 ] as const;
 
-export const COMMON_CONCURRENCY_VALUES = [1, 64, 128, 256] as const;
+export const COMMON_CONCURRENCY_VALUES = [1, 64, 128, 256, 512, 1024] as const;
 
 export const CHART_METRICS = {
   'output_token_throughput_tok_s': 'Output Token Throughput (tok/s)',

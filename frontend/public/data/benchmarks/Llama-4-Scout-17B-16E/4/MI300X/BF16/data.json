@@ -738,5 +738,375 @@
         "p99_ms": 506519.66
       }
     }
+  },
+  {
+    "timestamp": "2025-07-16T05:37:12+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 68.96,
+      "total_input_tokens": 407552,
+      "total_generated_tokens": 409600,
+      "request_throughput_req_s": 29.7,
+      "output_token_throughput_tok_s": 5939.37,
+      "total_token_throughput_tok_s": 11849.04,
+      "ttft": {
+        "mean_ms": 1524.67,
+        "median_ms": 808.08,
+        "p99_ms": 6454.49
+      },
+      "tpot": {
+        "mean_ms": 77.72,
+        "median_ms": 79.08,
+        "p99_ms": 82.34
+      },
+      "itl": {
+        "mean_ms": 77.72,
+        "median_ms": 58.77,
+        "p99_ms": 401.89
+      },
+      "e2el": {
+        "mean_ms": 16990.3,
+        "median_ms": 16688.16,
+        "p99_ms": 22085.59
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T05:39:18+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 100.45,
+      "total_input_tokens": 815104,
+      "total_generated_tokens": 819200,
+      "request_throughput_req_s": 40.78,
+      "output_token_throughput_tok_s": 8155.68,
+      "total_token_throughput_tok_s": 16270.57,
+      "ttft": {
+        "mean_ms": 1344.66,
+        "median_ms": 972.17,
+        "p99_ms": 5066.85
+      },
+      "tpot": {
+        "mean_ms": 118.4,
+        "median_ms": 115.52,
+        "p99_ms": 142.64
+      },
+      "itl": {
+        "mean_ms": 118.4,
+        "median_ms": 95.46,
+        "p99_ms": 458.99
+      },
+      "e2el": {
+        "mean_ms": 24907.06,
+        "median_ms": 23562.83,
+        "p99_ms": 33409.4
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T05:51:32+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 676.49,
+      "total_input_tokens": 1021952,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 3.03,
+      "output_token_throughput_tok_s": 6054.82,
+      "total_token_throughput_tok_s": 7565.5,
+      "ttft": {
+        "mean_ms": 2478.86,
+        "median_ms": 1303.38,
+        "p99_ms": 8115.94
+      },
+      "tpot": {
+        "mean_ms": 83.26,
+        "median_ms": 84.22,
+        "p99_ms": 85.54
+      },
+      "itl": {
+        "mean_ms": 83.26,
+        "median_ms": 77.54,
+        "p99_ms": 424.15
+      },
+      "e2el": {
+        "mean_ms": 168912.2,
+        "median_ms": 170425.04,
+        "p99_ms": 174776.43
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T06:14:35+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 1320.59,
+      "total_input_tokens": 2043904,
+      "total_generated_tokens": 8192000,
+      "request_throughput_req_s": 3.1,
+      "output_token_throughput_tok_s": 6203.29,
+      "total_token_throughput_tok_s": 7751.01,
+      "ttft": {
+        "mean_ms": 17926.44,
+        "median_ms": 21717.56,
+        "p99_ms": 28229.08
+      },
+      "tpot": {
+        "mean_ms": 148.63,
+        "median_ms": 146.94,
+        "p99_ms": 183.8
+      },
+      "itl": {
+        "mean_ms": 148.63,
+        "median_ms": 133.46,
+        "p99_ms": 518.02
+      },
+      "e2el": {
+        "mean_ms": 315040.41,
+        "median_ms": 315912.52,
+        "p99_ms": 385458.05
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T06:22:19+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 419.77,
+      "total_input_tokens": 2045952,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 4.88,
+      "output_token_throughput_tok_s": 4878.86,
+      "total_token_throughput_tok_s": 9752.84,
+      "ttft": {
+        "mean_ms": 4419.67,
+        "median_ms": 1357.39,
+        "p99_ms": 27196.53
+      },
+      "tpot": {
+        "mean_ms": 100.24,
+        "median_ms": 103.53,
+        "p99_ms": 104.58
+      },
+      "itl": {
+        "mean_ms": 100.24,
+        "median_ms": 78.06,
+        "p99_ms": 457.92
+      },
+      "e2el": {
+        "mean_ms": 104563.71,
+        "median_ms": 105119.4,
+        "p99_ms": 130085.92
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T06:35:32+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 743.68,
+      "total_input_tokens": 4091904,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 5.51,
+      "output_token_throughput_tok_s": 5507.72,
+      "total_token_throughput_tok_s": 11009.93,
+      "ttft": {
+        "mean_ms": 8826.59,
+        "median_ms": 1490.64,
+        "p99_ms": 57527.26
+      },
+      "tpot": {
+        "mean_ms": 176.11,
+        "median_ms": 183.08,
+        "p99_ms": 184.61
+      },
+      "itl": {
+        "mean_ms": 176.11,
+        "median_ms": 131.29,
+        "p99_ms": 496.76
+      },
+      "e2el": {
+        "mean_ms": 184758.43,
+        "median_ms": 185386.43,
+        "p99_ms": 238448.74
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T06:54:08+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 1058.4,
+      "total_input_tokens": 10237952,
+      "total_generated_tokens": 1024000,
+      "request_throughput_req_s": 1.93,
+      "output_token_throughput_tok_s": 967.5,
+      "total_token_throughput_tok_s": 10640.55,
+      "ttft": {
+        "mean_ms": 77378.94,
+        "median_ms": 58555.17,
+        "p99_ms": 233880.13
+      },
+      "tpot": {
+        "mean_ms": 361.28,
+        "median_ms": 386.09,
+        "p99_ms": 435.31
+      },
+      "itl": {
+        "mean_ms": 361.28,
+        "median_ms": 113.49,
+        "p99_ms": 699.16
+      },
+      "e2el": {
+        "mean_ms": 257657.09,
+        "median_ms": 253618.5,
+        "p99_ms": 428049.89
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T07:30:33+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 2098.71,
+      "total_input_tokens": 20475904,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 1.95,
+      "output_token_throughput_tok_s": 975.84,
+      "total_token_throughput_tok_s": 10732.25,
+      "ttft": {
+        "mean_ms": 305734.59,
+        "median_ms": 337893.6,
+        "p99_ms": 476434.29
+      },
+      "tpot": {
+        "mean_ms": 375.13,
+        "median_ms": 389.99,
+        "p99_ms": 439.61
+      },
+      "itl": {
+        "mean_ms": 375.13,
+        "median_ms": 120.21,
+        "p99_ms": 703.95
+      },
+      "e2el": {
+        "mean_ms": 492923.4,
+        "median_ms": 514037.76,
+        "p99_ms": 671368.88
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T08:13:18+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 2469.13,
+      "total_input_tokens": 20477952,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 0.83,
+      "output_token_throughput_tok_s": 829.44,
+      "total_token_throughput_tok_s": 9123.02,
+      "ttft": {
+        "mean_ms": 359185.24,
+        "median_ms": 398217.76,
+        "p99_ms": 554969.97
+      },
+      "tpot": {
+        "mean_ms": 219.39,
+        "median_ms": 226.61,
+        "p99_ms": 273.61
+      },
+      "itl": {
+        "mean_ms": 219.39,
+        "median_ms": 58.91,
+        "p99_ms": 809.16
+      },
+      "e2el": {
+        "mean_ms": 578356.82,
+        "median_ms": 600334.57,
+        "p99_ms": 782135.37
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T09:38:07+00:00",
+    "config": "Llama-4-Scout-17B-16E",
+    "model": "meta-llama/Llama-4-Scout-17B-16E",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 4933.86,
+      "total_input_tokens": 40955904,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 0.83,
+      "output_token_throughput_tok_s": 830.18,
+      "total_token_throughput_tok_s": 9131.17,
+      "ttft": {
+        "mean_ms": 898182.73,
+        "median_ms": 990583.19,
+        "p99_ms": 1172518.2
+      },
+      "tpot": {
+        "mean_ms": 224.53,
+        "median_ms": 226.91,
+        "p99_ms": 275.85
+      },
+      "itl": {
+        "mean_ms": 224.53,
+        "median_ms": 59.22,
+        "p99_ms": 810.93
+      },
+      "e2el": {
+        "mean_ms": 1122492.29,
+        "median_ms": 1217431.04,
+        "p99_ms": 1399993.31
+      }
+    }
   }
 ]

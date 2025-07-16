@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useModelBenchmarkData, useFilteredBenchmarkData, useFilterOptions, useBenchmarkDiscovery } from '@/hooks/useBenchmarkData';
 import { getMetricLabel } from '@/lib/schemas/benchmark';
 import { fetchHardwareInfo, formatHardwareInfo } from '@/lib/hardware';
+import { H100_PRICING, A100_PRICING, MI300X_PRICING } from '@/public/data/pricing/data';
 import {
   Box,
   FormControl,
@@ -115,6 +116,24 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
   );
 }
 
+// Helper function to get average pricing for a chip type
+function getAveragePricing(chip: string): number {
+  let pricing;
+
+  if (chip === 'H100') {
+    pricing = H100_PRICING;
+  } else if (chip === 'A100') {
+    pricing = A100_PRICING;
+  } else if (chip === 'MI300X') {
+    pricing = MI300X_PRICING;
+  } else {
+    return 0; // Default for unknown chips
+  }
+
+  const total = pricing.reduce((sum, p) => sum + p.on_demand_dollar_per_gpu_hour, 0);
+  return total / pricing.length;
+}
+
 export default function Dashboard() {
   // Load discovery data first
   const { discovery, loading: discoveryLoading } = useBenchmarkDiscovery();
@@ -204,7 +223,7 @@ export default function Dashboard() {
   }, [ioOptions, chartIoConfig]);
 
   // Apply filters and restrict to specific concurrency values
-  const ALLOWED_CONCURRENCIES = useMemo(() => [1, 64, 128, 256], []);
+  const ALLOWED_CONCURRENCIES = useMemo(() => [1, 64, 128, 256, 512, 1024], []);
   const memoizedFilters = useMemo(() => ({
     tensorParallelisms: filters.tensorParallelisms,
     chips: filters.chips,
@@ -253,7 +272,14 @@ export default function Dashboard() {
 
       // Get x and y values with proper validation
       const xValue = item[xMetric as keyof typeof item] as number;
-      const yValue = item[yMetric as keyof typeof item] as number;
+
+      // Handle special case for tokens_per_second_per_dollar metric
+      let yValue: number;
+      if (yMetric === 'tokens_per_second_per_dollar') {
+        yValue = item.output_token_throughput_tok_s / getAveragePricing(item.chip);
+      } else {
+        yValue = item[yMetric as keyof typeof item] as number;
+      }
 
       // Skip data points with invalid values
       if (xValue == null || yValue == null || isNaN(xValue) || isNaN(yValue)) {
@@ -263,9 +289,12 @@ export default function Dashboard() {
       if (!acc[key]) {
         acc[key] = [];
       }
+
+      const finalYValue = yValue;
+
       acc[key].push({
         x: xValue,
-        y: yValue,
+        y: finalYValue,
         chip: item.chip,
         precision: item.precision,
         tensorParallelism: item.tensorParallelism,
@@ -375,6 +404,7 @@ export default function Dashboard() {
   const yAxisMetrics = useMemo(() => [
     { value: 'output_token_throughput_tok_s', label: 'Output Token Throughput (tok/s)' },
     { value: 'ttft_mean_ms', label: 'Time to First Token - Mean (ms)' },
+    { value: 'tokens_per_second_per_dollar', label: 'Perf per dollar (tok/s/$)' },
   ], []);
 
   // Ensure Y-axis metric is valid
