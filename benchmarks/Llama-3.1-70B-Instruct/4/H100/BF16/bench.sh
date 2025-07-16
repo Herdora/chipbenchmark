@@ -2,10 +2,10 @@ set -euo pipefail
 
 MODEL_NAME="meta-llama/Llama-3.1-70B-Instruct"
 MODEL=${1:-$MODEL_NAME}
-PORT="${PORT:-8000}"
+PORT="${PORT:-8004}"
 SERVER_URL="http://localhost:$PORT"
 ISL_OSL=("200:200" "500:2000" "1000:1000" "5000:500" "10000:1000")
-CONCURRENCY_LEVELS=(1 64 128 256)
+CONCURRENCY_LEVELS=(512 1024) # TODO: add back 1 64 128 256
 LOGFILE="data.log"
 JSONFILE="data.json"
 
