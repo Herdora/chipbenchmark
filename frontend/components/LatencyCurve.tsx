@@ -38,7 +38,7 @@ export function LatencyCurve({ data }: LatencyCurveProps) {
         const point: { concurrency: number;[key: string]: number; } = { concurrency };
 
         chipData.forEach((result, chip) => {
-          point[chip] = result.ttft_ms;
+          point[chip] = result.ttft_mean_ms;
         });
 
         return point;

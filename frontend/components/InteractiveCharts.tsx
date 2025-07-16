@@ -64,7 +64,7 @@ export function InteractiveCharts({ data }: InteractiveChartsProps) {
       result[key] = arr
         .slice()
         .sort((a, b) => a.output_sequence_length - b.output_sequence_length)
-        .map(d => ({ output_sequence_length: d.output_sequence_length, tps: d.tps, ttft_ms: d.ttft_ms }));
+        .map(d => ({ output_sequence_length: d.output_sequence_length, tps: d.output_token_throughput_tok_s, ttft_ms: d.ttft_mean_ms }));
     });
     return result;
   }, [grouped]);

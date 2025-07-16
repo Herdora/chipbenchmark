@@ -44,10 +44,10 @@ const exportToCSV = (data: BenchmarkResult[]) => {
     result.precision,
     result.concurrency.toString(), // Use concurrency instead of batch_size
     result.concurrency.toString(),
-    result.ttft_ms.toFixed(1),
-    result.tps.toFixed(1),
-    result.power_w_avg?.toFixed(1) || 'N/A',
-    result.power_w_avg ? (result.tps / result.power_w_avg).toFixed(2) : 'N/A',
+    result.ttft_mean_ms.toFixed(1),
+    result.total_token_throughput_tok_s.toFixed(1),
+    'N/A', // power_w_avg not available in schema
+    'N/A', // efficiency not available without power data
     result.timestamp
   ]);
 
@@ -148,11 +148,10 @@ export function RunsTable({ data }: RunsTableProps) {
                   </TableCell>
                   <TableCell align="right">{result.concurrency}</TableCell>
                   <TableCell align="right">{result.concurrency}</TableCell>
-                  <TableCell align="right">{result.ttft_ms.toFixed(1)}</TableCell>
-                  <TableCell align="right">{result.tps.toFixed(0)}</TableCell>
-                  <TableCell align="right">{result.power_w_avg?.toFixed(1) || 'N/A'}</TableCell>
-                  <TableCell align="right">
-                    {result.power_w_avg ? (result.tps / result.power_w_avg).toFixed(2) : 'N/A'} tok/W
+                                  <TableCell align="right">{result.ttft_mean_ms.toFixed(1)}</TableCell>
+                <TableCell align="right">{result.total_token_throughput_tok_s.toFixed(0)}</TableCell>
+                <TableCell align="right">N/A</TableCell>
+                <TableCell align="right">N/A
                   </TableCell>
                   <TableCell>
                     <Typography variant="caption" color="text.secondary">

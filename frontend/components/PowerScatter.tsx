@@ -25,13 +25,15 @@ export function PowerScatter({ data }: PowerScatterProps) {
     const groupedData = new Map<string, Array<{ x: number; y: number; chip: string; model: string; precision: string; }>>();
 
     data.forEach(result => {
-      if (result.power_w_avg !== undefined) {
+      // Since power data is not available in the current schema, we'll skip power-based scatter
+      // This component would need power consumption data to be meaningful
+      if (false) { // Temporarily disabled until power data is available
         if (!groupedData.has(result.chip)) {
           groupedData.set(result.chip, []);
         }
         groupedData.get(result.chip)!.push({
-          x: result.power_w_avg,
-          y: result.tps,
+          x: 0, // power_w_avg not available
+          y: result.total_token_throughput_tok_s,
           chip: result.chip,
           model: result.model,
           precision: result.precision
@@ -40,10 +42,10 @@ export function PowerScatter({ data }: PowerScatterProps) {
     });
 
     // Calculate efficiency iso-lines (TPS = efficiency * power)
-    const powerValues = data.map(d => d.power_w_avg).filter(p => p !== undefined) as number[];
-    const maxPower = Math.max(...powerValues);
-    const minEfficiency = Math.min(...data.filter(d => d.power_w_avg !== undefined).map(d => d.tps / d.power_w_avg!));
-    const maxEfficiency = Math.max(...data.filter(d => d.power_w_avg !== undefined).map(d => d.tps / d.power_w_avg!));
+    // Since power data is not available, we'll use placeholder values
+    const maxPower = 1000; // Placeholder max power
+    const minEfficiency = 0.1; // Placeholder min efficiency
+    const maxEfficiency = 2.0; // Placeholder max efficiency
 
     // Create efficiency reference lines
     const efficiencyValues = [
@@ -71,7 +73,7 @@ export function PowerScatter({ data }: PowerScatterProps) {
     };
   }, [data]);
 
-  if (data.length === 0) {
+  if (data.length === 0 || chartData.length === 0) {
     return (
       <Card sx={{ height: '100%' }}>
         <CardContent>
@@ -80,7 +82,7 @@ export function PowerScatter({ data }: PowerScatterProps) {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
             <Typography variant="body1" color="text.secondary">
-              No data available
+              {data.length === 0 ? 'No data available' : 'Power consumption data not available'}
             </Typography>
           </Box>
         </CardContent>

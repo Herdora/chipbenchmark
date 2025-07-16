@@ -193,7 +193,7 @@ export function validateDataFile(data: unknown): BenchmarkDataFile {
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(
-        `Invalid benchmark data file format: ${error.errors
+        `Invalid benchmark data file format: ${error.issues
           .map(e => `${e.path.join('.')}: ${e.message}`)
           .join(', ')}`
       );
@@ -211,7 +211,7 @@ export function validateIndex(data: unknown): BenchmarkIndex {
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(
-        `Invalid benchmark index format: ${error.errors
+        `Invalid benchmark index format: ${error.issues
           .map(e => `${e.path.join('.')}: ${e.message}`)
           .join(', ')}`
       );
@@ -229,7 +229,7 @@ export function validateMetadata(data: unknown): BenchmarkMetadata {
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(
-        `Invalid benchmark metadata format: ${error.errors
+        `Invalid benchmark metadata format: ${error.issues
           .map(e => `${e.path.join('.')}: ${e.message}`)
           .join(', ')}`
       );
@@ -247,7 +247,7 @@ export function validateBenchmarkResult(data: unknown): BenchmarkResult {
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(
-        `Invalid benchmark result format: ${error.errors
+        `Invalid benchmark result format: ${error.issues
           .map(e => `${e.path.join('.')}: ${e.message}`)
           .join(', ')}`
       );
@@ -260,28 +260,28 @@ export function validateBenchmarkResult(data: unknown): BenchmarkResult {
  * Type guard for model names
  */
 export function isValidModel(value: string): value is ModelName {
-  return SUPPORTED_MODELS.includes(value as ModelName);
+  return (SUPPORTED_MODELS as readonly string[]).includes(value);
 }
 
 /**
  * Type guard for tensor parallelism values
  */
 export function isValidTensorParallelism(value: string): value is TensorParallelismValue {
-  return SUPPORTED_TENSOR_PARALLELISMS.includes(value as TensorParallelismValue);
+  return (SUPPORTED_TENSOR_PARALLELISMS as readonly string[]).includes(value);
 }
 
 /**
  * Type guard for chip names
  */
 export function isValidChip(value: string): value is ChipName {
-  return SUPPORTED_CHIPS.includes(value as ChipName);
+  return (SUPPORTED_CHIPS as readonly string[]).includes(value);
 }
 
 /**
  * Type guard for precision types
  */
 export function isValidPrecision(value: string): value is PrecisionType {
-  return SUPPORTED_PRECISIONS.includes(value as PrecisionType);
+  return (SUPPORTED_PRECISIONS as readonly string[]).includes(value);
 }
 
 /**

@@ -294,13 +294,24 @@ export function useBenchmarkKPIs(data: BenchmarkResult[]) {
   const [kpis, setKpis] = useState({
     maxThroughput: 0,
     avgLatency: 0,
+    avgThroughput: 0,
+    totalRequests: 0,
+    avgPower: 0,
     totalConfigurations: 0,
     uniqueModels: 0
   });
 
   useEffect(() => {
     if (data.length === 0) {
-      setKpis({ maxThroughput: 0, avgLatency: 0, totalConfigurations: 0, uniqueModels: 0 });
+      setKpis({ 
+        maxThroughput: 0, 
+        avgLatency: 0, 
+        avgThroughput: 0,
+        totalRequests: 0,
+        avgPower: 0,
+        totalConfigurations: 0, 
+        uniqueModels: 0 
+      });
       return;
     }
 
@@ -309,12 +320,18 @@ export function useBenchmarkKPIs(data: BenchmarkResult[]) {
 
     const maxThroughput = Math.max(...data.map(d => d.output_token_throughput_tok_s));
     const avgLatency = avg(data.map(d => d.ttft_mean_ms));
+    const avgThroughput = avg(data.map(d => d.output_token_throughput_tok_s));
+    const totalRequests = sum(data.map(d => d.successful_requests));
+    const avgPower = 0; // Power data not available in current schema
     const totalConfigurations = data.length;
     const uniqueModels = new Set(data.map(d => d.model)).size;
 
     setKpis({
       maxThroughput,
       avgLatency,
+      avgThroughput,
+      totalRequests,
+      avgPower,
       totalConfigurations,
       uniqueModels
     });
