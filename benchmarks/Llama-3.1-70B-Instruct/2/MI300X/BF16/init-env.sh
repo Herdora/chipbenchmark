@@ -18,6 +18,6 @@ docker run -it \
   -v "$CURRENT_DIR:$CONTAINER_DIR" \
   -w "$CONTAINER_DIR" \
   "$DOCKER_IMAGE" \
-  bash -c "apt update && apt install -y tmux && bash"
+  bash -c "bash"
   
  
