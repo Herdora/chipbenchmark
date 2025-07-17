@@ -1,14 +1,14 @@
 set -euo pipefail
 
-MODEL="Qwen/Qwen3-14B"
-TENSOR_PARALLEL_SIZE=1
+MODEL="meta-llama/Llama-3.1-70B-Instruct"
+TENSOR_PARALLEL_SIZE=4
 DTYPE="bfloat16"
-PORT="${PORT:-8001}"
-GPU_ID="${GPU_ID:-1}"
+PORT="${PORT:-8009}"
+GPU_ID="${GPU_ID:-4,5,6,7}"
 
+export VLLM_USE_V1=1
 export CUDA_VISIBLE_DEVICES=$GPU_ID
 export HSA_VISIBLE_DEVICES=$GPU_ID
-export VLLM_USE_V1=1
 
 echo ">>> Starting vLLM server on GPU $GPU_ID (port $PORT) for model $MODEL"
 

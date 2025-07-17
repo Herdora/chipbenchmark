@@ -7,6 +7,7 @@ CONTAINER_DIR="/vllm-workspace"
 echo ">>> Starting Docker container"
 echo ">>> Mounting: $CURRENT_DIR -> $CONTAINER_DIR"
 
+
 docker run -it \
   --entrypoint bash \
   --gpus all \
