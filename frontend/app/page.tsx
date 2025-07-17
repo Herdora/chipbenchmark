@@ -108,10 +108,11 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
       border: 1,
       borderColor: 'divider',
       minWidth: 200,
-      zIndex: 99999,
+      zIndex: 2147483647, // Maximum z-index value
       position: 'relative',
       boxShadow: 4,
       marginTop: '-10px',
+      pointerEvents: 'auto',
 
     }}>
       <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
