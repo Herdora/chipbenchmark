@@ -99,7 +99,18 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
   }, [selectedModel, data.tensorParallelism, data.chip, data.precision]);
 
   return (
-    <Box sx={{ p: 2, backgroundColor: 'background.paper', border: 1, borderColor: 'divider', minWidth: 200 }}>
+    <Box sx={{
+      p: 2,
+      backgroundColor: 'background.paper',
+      border: 1,
+      borderColor: 'divider',
+      minWidth: 200,
+      zIndex: 9999,
+      position: 'relative',
+      boxShadow: 3,
+      transform: 'translateY(-100%)',
+      marginTop: -1
+    }}>
       <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
         {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
       </Typography>
@@ -176,11 +187,11 @@ export default function Dashboard() {
       const availableChips = Array.from(new Set(modelData.map(d => d.chip))).sort();
       const availablePrecisions = Array.from(new Set(modelData.map(d => d.precision))).sort();
 
-      // Set defaults: first TP, all chips, first precision
+      // Set defaults: all TPs, all chips, all precisions
       setFilters({
-        tensorParallelisms: availableTps.length > 0 ? [availableTps[0]] : [],
+        tensorParallelisms: availableTps, // All tensor parallelisms selected
         chips: availableChips, // All chips selected
-        precisions: availablePrecisions.length > 0 ? [availablePrecisions[0]] : [] // Only first precision
+        precisions: availablePrecisions // All precisions selected
       });
     }
   }, [modelData, filterOptions]);
@@ -199,6 +210,12 @@ export default function Dashboard() {
 
   // I/O sequence length selectors - separate for chart and table
   const [chartIoConfig, setChartIoConfig] = useState<string>('200/200');
+
+  // Chart configuration toggle state
+  const [isChartConfigOpen, setIsChartConfigOpen] = useState(false);
+
+  // Filters toggle state
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const tableIoConfig: 'all' | string = 'all'; // Fixed value since setter was unused
 
   // Get available I/O configurations
@@ -403,8 +420,8 @@ export default function Dashboard() {
   // Y-axis options (limited set as requested)
   const yAxisMetrics = useMemo(() => [
     { value: 'output_token_throughput_tok_s', label: 'Output Token Throughput (tok/s)' },
-    { value: 'ttft_mean_ms', label: 'Time to First Token - Mean (ms)' },
     { value: 'tokens_per_second_per_dollar', label: 'Perf per dollar (tok/s/$)' },
+    { value: 'ttft_mean_ms', label: 'Time to First Token - Mean (ms)' },
   ], []);
 
   // Ensure Y-axis metric is valid
@@ -473,51 +490,97 @@ export default function Dashboard() {
       {/* Model Selection and Filters */}
       <Box sx={{
         display: 'flex',
-        gap: { xs: 0.5, md: 2 },
+        flexDirection: 'column',
+        gap: { xs: 1, md: 2 },
         p: { xs: 1, md: 2 },
+        pb: { xs: 3, md: 2 },
         borderBottom: 1,
         borderColor: 'divider',
-        alignItems: 'center',
-        flexWrap: 'wrap',
         overflow: 'hidden',
         minWidth: 0
       }}>
-        {/* Primary Model Selector */}
-        <FormControl size="small" variant="outlined" sx={{
-          minWidth: { xs: 120, md: 180 },
-          maxWidth: { xs: 140, md: 220 }
+        {/* Top Row: Model and Filters Label */}
+        <Box sx={{
+          display: 'flex',
+          gap: { xs: 1, md: 2 },
+          alignItems: 'center',
+          flexWrap: 'nowrap'
         }}>
-          <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Model</InputLabel>
-          <Select
-            value={selectedModel}
-            label="Model"
-            onChange={(e) => setSelectedModel(e.target.value)}
-            sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
-          >
-            {discovery && discovery.models.length > 0 ? (
-              discovery.models.map((model) => (
-                <MenuItem key={model} value={model}>
-                  {model}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem value="" disabled>
-                No models available
-              </MenuItem>
-            )}
-          </Select>
-        </FormControl>
-
-        {/* Filter Section */}
-        <Box sx={{ display: 'flex', gap: { xs: 0.5, md: 2 }, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{
-            display: { xs: 'none', md: 'block' },
-            fontSize: { md: 16 },
-            fontWeight: 600
+          {/* Primary Model Selector */}
+          <FormControl size="small" variant="outlined" sx={{
+            minWidth: { xs: 120, md: 180 },
+            maxWidth: { xs: 140, md: 220 }
           }}>
-            Filters:
-          </Typography>
+            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Model</InputLabel>
+            <Select
+              value={selectedModel}
+              label="Model"
+              onChange={(e) => setSelectedModel(e.target.value)}
+              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
+            >
+              {discovery && discovery.models.length > 0 ? (
+                discovery.models.map((model) => (
+                  <MenuItem key={model} value={model}>
+                    {model}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  No models available
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
 
+          {/* Filters Label */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: { xs: 'pointer', md: 'default' },
+            gap: 0.5
+          }}
+            onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
+            <Typography variant="h6" sx={{
+              fontSize: { xs: 14, md: 16 },
+              fontWeight: 600,
+              lineHeight: 1
+            }}>
+              Filters:
+            </Typography>
+            <Typography sx={{
+              fontSize: { xs: 10, md: 12 },
+              display: { xs: 'block', md: 'none' },
+              transform: isFiltersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              lineHeight: 1
+            }}>
+              ▼
+            </Typography>
+          </Box>
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Typography variant="body2" color="text.secondary" sx={{
+            fontSize: { xs: 9, md: 12 },
+            flexShrink: 1,
+            textAlign: 'right',
+            lineHeight: 1.2,
+            display: { xs: 'none', sm: 'block' }
+          }}>
+            {activeTab === 0
+              ? `${tableFilteredData.length} of ${modelData?.length || 0} results`
+              : `Showing ${Math.min(page * rowsPerPage + 1, tableData.length)}-${Math.min((page + 1) * rowsPerPage, tableData.length)} of ${tableData.length} results`
+            }
+          </Typography>
+        </Box>
+
+        {/* Filter Controls Row */}
+        <Box sx={{
+          display: { xs: isFiltersOpen ? 'flex' : 'none', md: 'flex' },
+          gap: { xs: 0.5, md: 2 },
+          flexWrap: 'wrap',
+          alignItems: 'center'
+        }}>
           {/* Tensor Parallelism Filter */}
           <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
             <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Tensor Parallelism</InputLabel>
@@ -632,21 +695,6 @@ export default function Dashboard() {
             </Select>
           </FormControl>
         </Box>
-
-        <Box sx={{ flexGrow: 1, minWidth: { xs: 4, md: 16 } }} />
-
-        <Typography variant="body2" color="text.secondary" sx={{
-          fontSize: { xs: 9, md: 12 },
-          flexShrink: 1,
-          textAlign: 'right',
-          lineHeight: 1.2,
-          display: { xs: 'none', sm: 'block' }
-        }}>
-          {activeTab === 0
-            ? `${tableFilteredData.length} of ${modelData?.length || 0} results`
-            : `Showing ${Math.min(page * rowsPerPage + 1, tableData.length)}-${Math.min((page + 1) * rowsPerPage, tableData.length)} of ${tableData.length} results`
-          }
-        </Typography>
       </Box>
 
       {/* Tabs */}
@@ -699,74 +747,95 @@ export default function Dashboard() {
                 flexDirection: 'column',
                 gap: { xs: 1, md: 2 }
               }}>
-                <Typography variant="h6" sx={{
-                  fontSize: { xs: 12, md: 14 },
-                  fontWeight: 600,
-                  mb: { xs: 0.5, md: 1 },
-                  display: { xs: 'none', md: 'block' }
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: { xs: 'pointer', md: 'default' },
+                  mb: { xs: 0.5, md: 1 }
+                }}
+                  onClick={() => setIsChartConfigOpen(!isChartConfigOpen)}>
+                  <Typography variant="h6" sx={{
+                    fontSize: { xs: 12, md: 14 },
+                    fontWeight: 600,
+                    display: { xs: 'block', md: 'block' }
+                  }}>
+                    Chart Configuration
+                  </Typography>
+                  <Typography sx={{
+                    fontSize: { xs: 12, md: 14 },
+                    display: { xs: 'block', md: 'none' },
+                    transform: isChartConfigOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease'
+                  }}>
+                    ▼
+                  </Typography>
+                </Box>
+
+                <Box sx={{
+                  display: { xs: isChartConfigOpen ? 'flex' : 'none', md: 'flex' },
+                  flexDirection: 'column',
+                  gap: { xs: 1, md: 2 }
                 }}>
-                  Chart Configuration
-                </Typography>
+                  <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                    <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Y-Axis</InputLabel>
+                    <Select
+                      value={yMetric}
+                      label="Y-Axis"
+                      onChange={(e) => setYMetric(e.target.value)}
+                      sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                    >
+                      {yAxisMetrics.map((metric) => (
+                        <MenuItem key={metric.value} value={metric.value}>
+                          {metric.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
-                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Y-Axis</InputLabel>
-                  <Select
-                    value={yMetric}
-                    label="Y-Axis"
-                    onChange={(e) => setYMetric(e.target.value)}
-                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
-                  >
-                    {yAxisMetrics.map((metric) => (
-                      <MenuItem key={metric.value} value={metric.value}>
-                        {metric.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                    <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>X-Axis</InputLabel>
+                    <Select
+                      value={xMetric}
+                      label="X-Axis"
+                      onChange={(e) => setXMetric(e.target.value)}
+                      sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                    >
+                      {availableMetrics.map((metric) => (
+                        <MenuItem key={metric.value} value={metric.value}>
+                          {metric.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
-                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>X-Axis</InputLabel>
-                  <Select
-                    value={xMetric}
-                    label="X-Axis"
-                    onChange={(e) => setXMetric(e.target.value)}
-                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
-                  >
-                    {availableMetrics.map((metric) => (
-                      <MenuItem key={metric.value} value={metric.value}>
-                        {metric.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  <Typography variant="h6" sx={{
+                    fontSize: { xs: 12, md: 14 },
+                    fontWeight: 600,
+                    mt: { xs: 0, md: 2 },
+                    mb: { xs: 0.5, md: 1 },
+                    display: { xs: 'none', md: 'block' }
+                  }}>
+                    I/O Configuration
+                  </Typography>
 
-                <Typography variant="h6" sx={{
-                  fontSize: { xs: 12, md: 14 },
-                  fontWeight: 600,
-                  mt: { xs: 0, md: 2 },
-                  mb: { xs: 0.5, md: 1 },
-                  display: { xs: 'none', md: 'block' }
-                }}>
-                  I/O Configuration
-                </Typography>
-
-                <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
-                  <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Input/Output</InputLabel>
-                  <Select
-                    value={chartIoConfig}
-                    label="Input/Output"
-                    onChange={(e) => setChartIoConfig(e.target.value)}
-                    sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
-                  >
-                    {ioOptions.map((config) => (
-                      <MenuItem key={config} value={config}>
-                        {config}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <RequestBenchmark />
+                  <FormControl size="small" variant="outlined" sx={{ minWidth: { xs: 120, md: 'auto' } }}>
+                    <InputLabel sx={{ fontSize: { xs: 11, md: 12 } }}>Input/Output</InputLabel>
+                    <Select
+                      value={chartIoConfig}
+                      label="Input/Output"
+                      onChange={(e) => setChartIoConfig(e.target.value)}
+                      sx={{ fontSize: { xs: 11, md: 12 }, height: { xs: 28, md: 32 } }}
+                    >
+                      {ioOptions.map((config) => (
+                        <MenuItem key={config} value={config}>
+                          {config}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <RequestBenchmark />
+                </Box>
               </Box>
             </Box>
 
@@ -824,77 +893,123 @@ export default function Dashboard() {
                       </Typography>
                     </Box>
                   ) : (
-                    <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative' }}>
-                      <ResponsiveLine
-                        data={chartData}
-                        margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
-                        xScale={{
-                          type: 'linear',
-                          min: 'auto',
-                          max: 'auto'
-                        }}
-                        yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
-                        colors={customColors}
-                        pointSize={20}
-                        pointColor={{ theme: 'background' }}
-                        pointBorderWidth={6}
-                        pointBorderColor={{ from: 'serieColor' }}
-                        enablePointLabel={false}
-                        useMesh={true}
-                        lineWidth={3}
-                        enableArea={false}
-                        curve="monotoneX"
-                        enableGridX={true}
-                        enableGridY={true}
-                        gridXValues={availableXValues}
-                        axisTop={null}
-                        axisRight={null}
-                        axisBottom={{
-                          tickSize: 5,
-                          tickPadding: 5,
-                          tickRotation: 0,
-                          legend: getMetricLabel(xMetric),
-                          legendPosition: 'middle',
-                          legendOffset: 46,
-                          tickValues: availableXValues
-                        }}
-                        axisLeft={{
-                          tickSize: 5,
-                          tickPadding: 5,
-                          tickRotation: 0,
-                          legend: getMetricLabel(yMetric),
-                          legendPosition: 'middle',
-                          legendOffset: -60
-                        }}
-                        legends={[]}
-                        tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                          <ChartTooltip
-                            point={point}
-                            xMetric={xMetric}
-                            yMetric={yMetric}
-                            selectedModel={selectedModel}
-                          />
-                        )}
-                      />
-                      {/* Custom Legend Box */}
+                    <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                      <Box sx={{ flex: 1, position: 'relative' }}>
+                        <ResponsiveLine
+                          data={chartData}
+                          margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
+                          xScale={{
+                            type: 'linear',
+                            min: 'auto',
+                            max: 'auto'
+                          }}
+                          yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
+                          colors={customColors}
+                          pointSize={20}
+                          pointColor={{ theme: 'background' }}
+                          pointBorderWidth={6}
+                          pointBorderColor={{ from: 'serieColor' }}
+                          enablePointLabel={false}
+                          useMesh={true}
+                          lineWidth={3}
+                          enableArea={false}
+                          curve="monotoneX"
+                          enableGridX={true}
+                          enableGridY={true}
+                          gridXValues={availableXValues}
+                          axisTop={null}
+                          axisRight={null}
+                          axisBottom={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: getMetricLabel(xMetric),
+                            legendPosition: 'middle',
+                            legendOffset: 46,
+                            tickValues: availableXValues
+                          }}
+                          axisLeft={{
+                            tickSize: 5,
+                            tickPadding: 5,
+                            tickRotation: 0,
+                            legend: getMetricLabel(yMetric),
+                            legendPosition: 'middle',
+                            legendOffset: -60
+                          }}
+                          legends={[]}
+                          tooltip={({ point }: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+                            <ChartTooltip
+                              point={point}
+                              xMetric={xMetric}
+                              yMetric={yMetric}
+                              selectedModel={selectedModel}
+                            />
+                          )}
+                        />
+                        {/* Custom Legend Box - Desktop Only */}
+                        <Box sx={{
+                          position: 'absolute',
+                          right: 16,
+                          bottom: 80,
+                          zIndex: 10,
+                          bgcolor: 'background.paper',
+                          border: 1,
+                          borderColor: 'divider',
+                          borderRadius: 1,
+                          boxShadow: 2,
+                          px: 2,
+                          py: 1,
+                          minWidth: 120,
+                          maxWidth: 220,
+                          fontSize: 12,
+                          display: { xs: 'none', md: 'block' }
+                        }}>
+                          {chartData.map((series, idx) => (
+                            <Box key={series.id} sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              mb: idx !== chartData.length - 1 ? 0.5 : 0
+                            }}>
+                              <Box sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: '50%',
+                                bgcolor: customColors[idx % customColors.length],
+                                mr: 1,
+                                flexShrink: 0
+                              }} />
+                              <Typography sx={{
+                                fontSize: 12,
+                                color: 'text.primary',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {series.id}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+
+                      {/* Custom Legend Box - Mobile Only (Bottom) */}
                       <Box sx={{
-                        position: 'absolute',
-                        right: 16,
-                        bottom: 80,
-                        zIndex: 10,
+                        display: { xs: 'grid', md: 'none' },
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                        gap: 1,
+                        mt: 2,
+                        p: 2,
                         bgcolor: 'background.paper',
                         border: 1,
                         borderColor: 'divider',
                         borderRadius: 1,
-                        boxShadow: 2,
-                        px: 2,
-                        py: 1,
-                        minWidth: 120,
-                        maxWidth: 220,
-                        fontSize: 12,
+                        boxShadow: 1
                       }}>
                         {chartData.map((series, idx) => (
-                          <Box key={series.id} sx={{ display: 'flex', alignItems: 'center', mb: idx !== chartData.length - 1 ? 0.5 : 0 }}>
+                          <Box key={series.id} sx={{
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
                             <Box sx={{
                               width: 10,
                               height: 10,
@@ -903,7 +1018,13 @@ export default function Dashboard() {
                               mr: 1,
                               flexShrink: 0
                             }} />
-                            <Typography sx={{ fontSize: 12, color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography sx={{
+                              fontSize: 11,
+                              color: 'text.primary',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              lineHeight: 1.2
+                            }}>
                               {series.id}
                             </Typography>
                           </Box>
@@ -1073,7 +1194,7 @@ export default function Dashboard() {
       {/* Mobile bottom filler bar to reduce chart height */}
       <Box sx={{
         display: { xs: 'block', md: 'none' },
-        height: { xs: 80, sm: 60 },
+        height: { xs: 20, sm: 16 },
         backgroundColor: 'background.default',
         borderTop: 1,
         borderColor: 'divider',

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2025-07-16T20:18:34.584Z",
+  "lastUpdated": "2025-07-17T05:48:26.833Z",
   "benchmarks": [
     {
       "model": "Llama-3.1-70B-Instruct",
@@ -33,7 +33,7 @@
       "tensorParallelism": "1",
       "chip": "A100",
       "precision": "BF16",
-      "dataPoints": 20,
+      "dataPoints": 30,
       "path": "benchmarks/Llama-3.1-8B-Instruct/1/A100/BF16/data.json",
       "hasHardwareData": true
     },
@@ -78,7 +78,7 @@
       "tensorParallelism": "4",
       "chip": "A100",
       "precision": "BF16",
-      "dataPoints": 20,
+      "dataPoints": 30,
       "path": "benchmarks/Llama-4-Scout-17B-16E/4/A100/BF16/data.json",
       "hasHardwareData": true
     },
@@ -121,6 +121,15 @@
     {
       "model": "Qwen2-7B",
       "tensorParallelism": "2",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 30,
+      "path": "benchmarks/Qwen2-7B/2/A100/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Qwen2-7B",
+      "tensorParallelism": "2",
       "chip": "H100",
       "precision": "BF16",
       "dataPoints": 20,
@@ -132,7 +141,7 @@
       "tensorParallelism": "1",
       "chip": "A100",
       "precision": "BF16",
-      "dataPoints": 20,
+      "dataPoints": 30,
       "path": "benchmarks/Qwen3-14B/1/A100/BF16/data.json",
       "hasHardwareData": true
     },
@@ -153,6 +162,15 @@
       "dataPoints": 20,
       "path": "benchmarks/Qwen3-14B/1/MI300X/BF16/data.json",
       "hasHardwareData": true
+    },
+    {
+      "model": "Qwen3-14B",
+      "tensorParallelism": "2",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 30,
+      "path": "benchmarks/Qwen3-14B/2/A100/BF16/data.json",
+      "hasHardwareData": false
     },
     {
       "model": "Qwen3-14B",

@@ -1,5 +1,5 @@
 {
-  "gpu": "H100",
-  "type": "SXM5",
+  "gpu": "A100",
+  "type": "SXM4",
   "memory": "80GB"
 }
