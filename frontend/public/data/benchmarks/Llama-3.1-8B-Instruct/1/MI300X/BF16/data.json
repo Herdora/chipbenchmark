@@ -738,5 +738,375 @@
         "p99_ms": 774781.71
       }
     }
+  },
+  {
+    "timestamp": "2025-07-16T20:30:39+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 43.07,
+      "total_input_tokens": 407552,
+      "total_generated_tokens": 409600,
+      "request_throughput_req_s": 47.55,
+      "output_token_throughput_tok_s": 9510.75,
+      "total_token_throughput_tok_s": 18973.95,
+      "ttft": {
+        "mean_ms": 1165.75,
+        "median_ms": 759.66,
+        "p99_ms": 4729.79
+      },
+      "tpot": {
+        "mean_ms": 47.05,
+        "median_ms": 47.93,
+        "p99_ms": 52.41
+      },
+      "itl": {
+        "mean_ms": 47.05,
+        "median_ms": 35.39,
+        "p99_ms": 261.57
+      },
+      "e2el": {
+        "mean_ms": 10529.37,
+        "median_ms": 10265.29,
+        "p99_ms": 14333.05
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T20:32:12+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 200,
+    "output_sequence_length": 200,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 67.42,
+      "total_input_tokens": 815104,
+      "total_generated_tokens": 819200,
+      "request_throughput_req_s": 60.75,
+      "output_token_throughput_tok_s": 12149.92,
+      "total_token_throughput_tok_s": 24239.1,
+      "ttft": {
+        "mean_ms": 644.46,
+        "median_ms": 554.94,
+        "p99_ms": 1309.11
+      },
+      "tpot": {
+        "mean_ms": 80.66,
+        "median_ms": 80.04,
+        "p99_ms": 97.41
+      },
+      "itl": {
+        "mean_ms": 80.72,
+        "median_ms": 65.28,
+        "p99_ms": 284.89
+      },
+      "e2el": {
+        "mean_ms": 16695.83,
+        "median_ms": 16349.86,
+        "p99_ms": 20005.7
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T20:43:32+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 641.77,
+      "total_input_tokens": 1021952,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 3.19,
+      "output_token_throughput_tok_s": 6382.35,
+      "total_token_throughput_tok_s": 7974.74,
+      "ttft": {
+        "mean_ms": 2503.43,
+        "median_ms": 1684.24,
+        "p99_ms": 9225.78
+      },
+      "tpot": {
+        "mean_ms": 78.61,
+        "median_ms": 78.98,
+        "p99_ms": 80.62
+      },
+      "itl": {
+        "mean_ms": 78.61,
+        "median_ms": 74.22,
+        "p99_ms": 318.43
+      },
+      "e2el": {
+        "mean_ms": 159636.21,
+        "median_ms": 159742.35,
+        "p99_ms": 166168.87
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T21:08:08+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 500,
+    "output_sequence_length": 2000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 1431.78,
+      "total_input_tokens": 2043904,
+      "total_generated_tokens": 8192000,
+      "request_throughput_req_s": 2.86,
+      "output_token_throughput_tok_s": 5721.54,
+      "total_token_throughput_tok_s": 7149.06,
+      "ttft": {
+        "mean_ms": 32498.17,
+        "median_ms": 19980.14,
+        "p99_ms": 173591.46
+      },
+      "tpot": {
+        "mean_ms": 152.63,
+        "median_ms": 139.23,
+        "p99_ms": 224.35
+      },
+      "itl": {
+        "mean_ms": 152.63,
+        "median_ms": 115.61,
+        "p99_ms": 398.2
+      },
+      "e2el": {
+        "mean_ms": 337612.51,
+        "median_ms": 318721.01,
+        "p99_ms": 462449.33
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T21:15:01+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 380.55,
+      "total_input_tokens": 2045952,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 5.38,
+      "output_token_throughput_tok_s": 5381.75,
+      "total_token_throughput_tok_s": 10758.13,
+      "ttft": {
+        "mean_ms": 3489.13,
+        "median_ms": 1105.99,
+        "p99_ms": 21285.67
+      },
+      "tpot": {
+        "mean_ms": 91.42,
+        "median_ms": 94.1,
+        "p99_ms": 95.37
+      },
+      "itl": {
+        "mean_ms": 91.42,
+        "median_ms": 75.37,
+        "p99_ms": 377.41
+      },
+      "e2el": {
+        "mean_ms": 94821.12,
+        "median_ms": 95761.96,
+        "p99_ms": 114121.1
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T21:29:45+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 1000,
+    "output_sequence_length": 1000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 842.15,
+      "total_input_tokens": 4091904,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 4.86,
+      "output_token_throughput_tok_s": 4863.72,
+      "total_token_throughput_tok_s": 9722.58,
+      "ttft": {
+        "mean_ms": 31653.7,
+        "median_ms": 24398.7,
+        "p99_ms": 98466.95
+      },
+      "tpot": {
+        "mean_ms": 169.3,
+        "median_ms": 156.7,
+        "p99_ms": 270.58
+      },
+      "itl": {
+        "mean_ms": 169.3,
+        "median_ms": 118.8,
+        "p99_ms": 435.06
+      },
+      "e2el": {
+        "mean_ms": 200786.99,
+        "median_ms": 186480.9,
+        "p99_ms": 313016.18
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T21:52:03+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 1288.32,
+      "total_input_tokens": 10237952,
+      "total_generated_tokens": 1024000,
+      "request_throughput_req_s": 1.59,
+      "output_token_throughput_tok_s": 794.83,
+      "total_token_throughput_tok_s": 8741.56,
+      "ttft": {
+        "mean_ms": 167181.53,
+        "median_ms": 171801.79,
+        "p99_ms": 299490.29
+      },
+      "tpot": {
+        "mean_ms": 276.02,
+        "median_ms": 287.49,
+        "p99_ms": 351.13
+      },
+      "itl": {
+        "mean_ms": 276.02,
+        "median_ms": 97.61,
+        "p99_ms": 775.64
+      },
+      "e2el": {
+        "mean_ms": 304913.75,
+        "median_ms": 315115.14,
+        "p99_ms": 443615.14
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T22:36:24+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 5000,
+    "output_sequence_length": 500,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 2584.35,
+      "total_input_tokens": 20475904,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 1.58,
+      "output_token_throughput_tok_s": 792.46,
+      "total_token_throughput_tok_s": 8715.51,
+      "ttft": {
+        "mean_ms": 449979.67,
+        "median_ms": 487793.95,
+        "p99_ms": 606063.22
+      },
+      "tpot": {
+        "mean_ms": 283.1,
+        "median_ms": 287.64,
+        "p99_ms": 355.51
+      },
+      "itl": {
+        "mean_ms": 283.11,
+        "median_ms": 97.76,
+        "p99_ms": 776.08
+      },
+      "e2el": {
+        "mean_ms": 591248.95,
+        "median_ms": 631393.87,
+        "p99_ms": 749274.77
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-16T23:51:07+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 512,
+    "metrics": {
+      "successful_requests": 2048,
+      "benchmark_duration_s": 4402.74,
+      "total_input_tokens": 20477952,
+      "total_generated_tokens": 2048000,
+      "request_throughput_req_s": 0.47,
+      "output_token_throughput_tok_s": 465.16,
+      "total_token_throughput_tok_s": 5116.35,
+      "ttft": {
+        "mean_ms": 763911.23,
+        "median_ms": 822483.31,
+        "p99_ms": 1030157.66
+      },
+      "tpot": {
+        "mean_ms": 241.58,
+        "median_ms": 244.34,
+        "p99_ms": 317.26
+      },
+      "itl": {
+        "mean_ms": 241.58,
+        "median_ms": 98.46,
+        "p99_ms": 1242.04
+      },
+      "e2el": {
+        "mean_ms": 1005253.22,
+        "median_ms": 1066497.32,
+        "p99_ms": 1275464.64
+      }
+    }
+  },
+  {
+    "timestamp": "2025-07-17T02:20:00+00:00",
+    "config": "Llama-3.1-8B-Instruct",
+    "model": "meta-llama/Llama-3.1-8B-Instruct",
+    "input_sequence_length": 10000,
+    "output_sequence_length": 1000,
+    "concurrency": 1024,
+    "metrics": {
+      "successful_requests": 4096,
+      "benchmark_duration_s": 8801.32,
+      "total_input_tokens": 40955904,
+      "total_generated_tokens": 4096000,
+      "request_throughput_req_s": 0.47,
+      "output_token_throughput_tok_s": 465.38,
+      "total_token_throughput_tok_s": 5118.77,
+      "ttft": {
+        "mean_ms": 1727082.13,
+        "median_ms": 1978920.95,
+        "p99_ms": 2069100.89
+      },
+      "tpot": {
+        "mean_ms": 244.76,
+        "median_ms": 244.79,
+        "p99_ms": 322.74
+      },
+      "itl": {
+        "mean_ms": 244.76,
+        "median_ms": 98.44,
+        "p99_ms": 1241.53
+      },
+      "e2el": {
+        "mean_ms": 1971596.33,
+        "median_ms": 2222199.03,
+        "p99_ms": 2315510.79
+      }
+    }
   }
 ]

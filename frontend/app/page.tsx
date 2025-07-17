@@ -98,6 +98,9 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
     loadHardwareInfo();
   }, [selectedModel, data.tensorParallelism, data.chip, data.precision]);
 
+  // Get average pricing for this chip
+  const avgPrice = getAveragePricing(data.chip);
+
   return (
     <Box sx={{
       p: 2,
@@ -105,11 +108,11 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
       border: 1,
       borderColor: 'divider',
       minWidth: 200,
-      zIndex: 9999,
+      zIndex: 99999,
       position: 'relative',
-      boxShadow: 3,
-      transform: 'translateY(-100%)',
-      marginTop: -1
+      boxShadow: 4,
+      marginTop: '-10px',
+
     }}>
       <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
         {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
@@ -119,6 +122,9 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
       </Typography>
       <Typography variant="body2" sx={{ mb: 1 }}>
         {yMetric}: {data.y}
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 1, fontSize: 11, color: 'text.secondary' }}>
+        Avg GPU Price: ${avgPrice.toFixed(2)}/hr
       </Typography>
       <Typography variant="body2" sx={{ fontSize: 11, color: 'text.secondary', fontStyle: 'italic' }}>
         {hardwareInfo}
@@ -537,13 +543,27 @@ export default function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             cursor: { xs: 'pointer', md: 'default' },
-            gap: 0.5
+            gap: 0.5,
+            px: { xs: 1, md: 0 },
+            py: { xs: 0.5, md: 0 },
+            borderRadius: { xs: 1, md: 0 },
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: { xs: 'action.hover', md: 'transparent' },
+              transform: { xs: 'scale(1.02)', md: 'none' }
+            },
+            '&:active': {
+              backgroundColor: { xs: 'action.selected', md: 'transparent' },
+              transform: { xs: 'scale(0.98)', md: 'none' }
+            }
           }}
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}>
             <Typography variant="h6" sx={{
               fontSize: { xs: 14, md: 16 },
               fontWeight: 600,
-              lineHeight: 1
+              lineHeight: 1,
+              transition: 'color 0.2s ease',
+              color: { xs: isFiltersOpen ? 'primary.main' : 'text.primary', md: 'text.primary' }
             }}>
               Filters:
             </Typography>
@@ -551,8 +571,9 @@ export default function Dashboard() {
               fontSize: { xs: 10, md: 12 },
               display: { xs: 'block', md: 'none' },
               transform: isFiltersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-              lineHeight: 1
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              lineHeight: 1,
+              color: isFiltersOpen ? 'primary.main' : 'text.secondary'
             }}>
               ▼
             </Typography>
@@ -835,6 +856,28 @@ export default function Dashboard() {
                     </Select>
                   </FormControl>
                   <RequestBenchmark />
+
+                  <Box sx={{
+                    mt: { xs: 1.5, md: 2 },
+                    pt: { xs: 1.5, md: 2 },
+                    borderTop: 1,
+                    borderColor: 'divider'
+                  }}>
+                    <Typography variant="body2" sx={{ fontSize: { xs: 10, md: 11 }, color: 'text.secondary', fontStyle: 'italic', textAlign: 'center' }}>
+                      *Note: All GPU pricing data can be found{' '}
+                      <a
+                        href="https://github.com/Herdora/chipbenchmark/tree/main/frontend/public/data/pricing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: '#1976d2',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        in the repository
+                      </a>
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             </Box>

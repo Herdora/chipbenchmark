@@ -1,13 +1,40 @@
 {
-  "lastUpdated": "2025-07-17T05:48:26.833Z",
+  "lastUpdated": "2025-07-17T06:08:24.606Z",
   "benchmarks": [
+    {
+      "model": "Llama-3-70B-Instruct",
+      "tensorParallelism": "1",
+      "chip": "MI300X",
+      "precision": "FP8",
+      "dataPoints": 16,
+      "path": "benchmarks/Llama-3-70B-Instruct/1/MI300X/FP8/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3-70B-Instruct",
+      "tensorParallelism": "2",
+      "chip": "H100",
+      "precision": "FP8",
+      "dataPoints": 24,
+      "path": "benchmarks/Llama-3-70B-Instruct/2/H100/FP8/data.json",
+      "hasHardwareData": true
+    },
     {
       "model": "Llama-3.1-70B-Instruct",
       "tensorParallelism": "2",
       "chip": "MI300X",
       "precision": "BF16",
-      "dataPoints": 20,
+      "dataPoints": 28,
       "path": "benchmarks/Llama-3.1-70B-Instruct/2/MI300X/BF16/data.json",
+      "hasHardwareData": true
+    },
+    {
+      "model": "Llama-3.1-70B-Instruct",
+      "tensorParallelism": "4",
+      "chip": "A100",
+      "precision": "BF16",
+      "dataPoints": 29,
+      "path": "benchmarks/Llama-3.1-70B-Instruct/4/A100/BF16/data.json",
       "hasHardwareData": true
     },
     {
@@ -51,7 +78,7 @@
       "tensorParallelism": "1",
       "chip": "MI300X",
       "precision": "BF16",
-      "dataPoints": 20,
+      "dataPoints": 30,
       "path": "benchmarks/Llama-3.1-8B-Instruct/1/MI300X/BF16/data.json",
       "hasHardwareData": true
     },
