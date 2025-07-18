@@ -31,6 +31,7 @@ import {
 } from '@mui/material';
 import { ResponsiveLine } from '@nivo/line';
 import { RequestBenchmark } from '@/components/RequestHardware';
+import ReactDOM from 'react-dom';
 
 interface FilterState {
   tensorParallelisms: string[];
@@ -62,6 +63,8 @@ function TabPanel(props: TabPanelProps) {
 
 function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
   point: {
+    x: number;
+    y: number;
     data: {
       chip: string;
       precision: string;
@@ -77,6 +80,8 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
 }) {
   const { data } = point;
   const [hardwareInfo, setHardwareInfo] = useState<string>('Loading hardware info...');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const tooltipRef = React.useRef<HTMLDivElement>(null);
 
   // Load hardware info when component mounts
   React.useEffect(() => {
@@ -98,23 +103,78 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
     loadHardwareInfo();
   }, [selectedModel, data.tensorParallelism, data.chip, data.precision]);
 
+  // Calculate tooltip position based on point coordinates and viewport
+  React.useEffect(() => {
+    if (tooltipRef.current) {
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Start with point position (these are relative to the chart)
+      let x = point.x;
+      let y = point.y;
+
+      // Get the chart container position
+      const chartContainer = document.querySelector('.chart-container');
+      if (chartContainer) {
+        const chartRect = chartContainer.getBoundingClientRect();
+        x += chartRect.left;
+        y += chartRect.top;
+      }
+
+      // Offset from cursor
+      const offset = 20;
+
+      // Default position: right and below cursor
+      let finalX = x + offset;
+      let finalY = y + offset;
+
+      // Check right boundary
+      if (finalX + tooltipRect.width > viewportWidth - 10) {
+        finalX = x - tooltipRect.width - offset; // Position to left
+      }
+
+      // Check bottom boundary
+      if (finalY + tooltipRect.height > viewportHeight - 10) {
+        finalY = y - tooltipRect.height - offset; // Position above
+      }
+
+      // Ensure tooltip doesn't go off left edge
+      if (finalX < 10) {
+        finalX = 10;
+      }
+
+      // Ensure tooltip doesn't go off top edge
+      if (finalY < 10) {
+        finalY = 10;
+      }
+
+      setTooltipPosition({ x: finalX, y: finalY });
+    }
+  }, [point.x, point.y]);
+
   // Get average pricing for this chip
   const avgPrice = getAveragePricing(data.chip);
 
-  return (
-    <Box sx={{
-      p: 2,
-      backgroundColor: 'background.paper',
-      border: 1,
-      borderColor: 'divider',
-      minWidth: 200,
-      zIndex: 2147483647, // Maximum z-index value
-      position: 'relative',
-      boxShadow: 4,
-      marginTop: '-10px',
-      pointerEvents: 'auto',
-
-    }}>
+  return ReactDOM.createPortal(
+    <Box
+      ref={tooltipRef}
+      sx={{
+        position: 'fixed',
+        left: tooltipPosition.x,
+        top: tooltipPosition.y,
+        p: 2,
+        backgroundColor: 'background.paper',
+        border: 1,
+        borderColor: 'divider',
+        minWidth: 200,
+        zIndex: 2147483647,
+        boxShadow: 4,
+        pointerEvents: 'none',
+        opacity: tooltipPosition.x === 0 && tooltipPosition.y === 0 ? 0 : 1,
+        transition: 'opacity 0.1s ease-in-out'
+      }}
+    >
       <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
         {data.chip} • {data.precision.toUpperCase()} • TP:{data.tensorParallelism}
       </Typography>
@@ -130,7 +190,8 @@ function ChartTooltip({ point, xMetric, yMetric, selectedModel }: {
       <Typography variant="body2" sx={{ fontSize: 11, color: 'text.secondary', fontStyle: 'italic' }}>
         {hardwareInfo}
       </Typography>
-    </Box>
+    </Box>,
+    document.body
   );
 }
 
@@ -351,6 +412,8 @@ export default function Dashboard() {
         data
       }));
   }, [chartFilteredData, xMetric, yMetric]);
+
+
 
   // Table data processing
   const tableData = useMemo(() => {
@@ -628,7 +691,7 @@ export default function Dashboard() {
                     px: 1,
                     py: 0.25,
                     borderRadius: 1,
-                    bgcolor: filters.tensorParallelisms.includes(tp) ? 'primary.main' : 'grey.100',
+                    bgcolor: filters.tensorParallelisms.includes(tp) ? 'primary.main' : 'action.hover',
                     color: filters.tensorParallelisms.includes(tp) ? 'white' : 'text.primary',
                     fontSize: 12,
                     fontWeight: 500,
@@ -666,7 +729,7 @@ export default function Dashboard() {
                     px: 1,
                     py: 0.25,
                     borderRadius: 1,
-                    bgcolor: filters.chips.includes(chip) ? 'primary.main' : 'grey.100',
+                    bgcolor: filters.chips.includes(chip) ? 'primary.main' : 'action.hover',
                     color: filters.chips.includes(chip) ? 'white' : 'text.primary',
                     fontSize: 12,
                     fontWeight: 500,
@@ -704,7 +767,7 @@ export default function Dashboard() {
                     px: 1,
                     py: 0.25,
                     borderRadius: 1,
-                    bgcolor: filters.precisions.includes(precision) ? 'primary.main' : 'grey.100',
+                    bgcolor: filters.precisions.includes(precision) ? 'primary.main' : 'action.hover',
                     color: filters.precisions.includes(precision) ? 'white' : 'text.primary',
                     fontSize: 12,
                     fontWeight: 500,
@@ -871,7 +934,7 @@ export default function Dashboard() {
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
-                          color: '#1976d2',
+                          color: 'inherit',
                           textDecoration: 'underline'
                         }}
                       >
@@ -938,7 +1001,7 @@ export default function Dashboard() {
                     </Box>
                   ) : (
                     <Box sx={{ width: '100%', height: '100%', minHeight: { xs: '300px', md: '400px' }, position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                      <Box sx={{ flex: 1, position: 'relative' }}>
+                      <Box sx={{ flex: 1, position: 'relative' }} className="chart-container">
                         <ResponsiveLine
                           data={chartData}
                           margin={{ top: 40, right: 60, bottom: 60, left: 70 }}
