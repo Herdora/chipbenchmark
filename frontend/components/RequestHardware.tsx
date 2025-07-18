@@ -100,7 +100,7 @@ export function RequestBenchmark({}: RequestBenchmarkProps) {
                   required
                   multiline
                   rows={3}
-                  placeholder="model, chip, precision, concurrency, anythign really"
+                  placeholder="model, chip, precision, concurrency, anything really"
                   sx={{
                     '& .MuiInputBase-input': { fontSize: { xs: 10, md: 12 } },
                     '& .MuiInputLabel-root': { fontSize: { xs: 10, md: 12 } }
