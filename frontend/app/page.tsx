@@ -1056,6 +1056,23 @@ export default function Dashboard() {
                                 strokeDasharray: '6 4',
                               },
                             },
+                            axis: {
+                              legend: {
+                                text: {
+                                  fill: theme.palette.mode === 'dark' ? '#fff' : '#222',
+                                },
+                              },
+                              ticks: {
+                                text: {
+                                  fill: theme.palette.mode === 'dark' ? '#fff' : '#222',
+                                },
+                              },
+                            },
+                            legends: {
+                              text: {
+                                fill: theme.palette.mode === 'dark' ? '#fff' : '#222',
+                              },
+                            },
                           }}
                         />
                         {/* Custom Legend Box - Desktop Only */}
