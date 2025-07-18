@@ -32,6 +32,7 @@ import {
 import { ResponsiveLine } from '@nivo/line';
 import { RequestBenchmark } from '@/components/RequestHardware';
 import ReactDOM from 'react-dom';
+import { useTheme } from '@mui/material/styles';
 
 interface FilterState {
   tensorParallelisms: string[];
@@ -214,6 +215,7 @@ function getAveragePricing(chip: string): number {
 }
 
 export default function Dashboard() {
+  const theme = useTheme();
   // Load discovery data first
   const { discovery, loading: discoveryLoading } = useBenchmarkDiscovery();
 
@@ -277,7 +279,7 @@ export default function Dashboard() {
   const [yMetric, setYMetric] = useState('output_token_throughput_tok_s');
 
   // I/O sequence length selectors - separate for chart and table
-  const [chartIoConfig, setChartIoConfig] = useState<string>('200/200');
+  const [chartIoConfig, setChartIoConfig] = useState<string>('1000/1000');
 
   // Chart configuration toggle state
   const [isChartConfigOpen, setIsChartConfigOpen] = useState(false);
@@ -529,6 +531,13 @@ export default function Dashboard() {
     borderRadius: 1,
     fontSize: 12,
   };
+  const selectedChipSx = {
+    bgcolor: theme.palette.mode === 'light' ? '#3B4656' : theme.palette.primary.main,
+    color: theme.palette.mode === 'light' ? '#fff' : theme.palette.primary.contrastText,
+    fontWeight: 600,
+    borderRadius: 1,
+    fontSize: 12,
+  };
 
   // Show loading spinner only for initial discovery (model dropdown)
   if (discoveryLoading) {
@@ -666,6 +675,39 @@ export default function Dashboard() {
           flexWrap: 'wrap',
           alignItems: 'center'
         }}>
+          {/* Chip Filter (move before Tensor Parallelism) */}
+          <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
+            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Chips</InputLabel>
+            <Select
+              multiple
+              value={filters.chips}
+              onChange={handleMultiSelectChange('chips')}
+              input={<OutlinedInput label="Chips" />}
+              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
+              renderValue={(selected) => (
+                selected.length > 1
+                  ? `${selected.length} selected`
+                  : selected.length === 1
+                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={selectedChipSx} />
+                    : null
+              )}
+            >
+              {filterOptions.chips.map((chip) => (
+                <MenuItem key={chip} value={chip} sx={{ py: 0.5 }}>
+                  <Checkbox checked={filters.chips.includes(chip)} size="small" />
+                  <Box sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.25,
+                    ...(filters.chips.includes(chip) ? selectedChipSx : softBlueChipSx),
+                    minWidth: 'fit-content'
+                  }}>
+                    {chip}
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           {/* Tensor Parallelism Filter */}
           <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
             <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Tensor Parallelism</InputLabel>
@@ -679,7 +721,7 @@ export default function Dashboard() {
                 selected.length > 1
                   ? `${selected.length} selected`
                   : selected.length === 1
-                    ? <Chip key={selected[0]} label={`TP:${selected[0]}`} size="small" sx={softBlueChipSx} />
+                    ? <Chip key={selected[0]} label={`TP:${selected[0]}`} size="small" sx={selectedChipSx} />
                     : null
               )}
             >
@@ -690,52 +732,10 @@ export default function Dashboard() {
                     ml: 1,
                     px: 1,
                     py: 0.25,
-                    borderRadius: 1,
-                    bgcolor: filters.tensorParallelisms.includes(tp) ? 'primary.main' : 'action.hover',
-                    color: filters.tensorParallelisms.includes(tp) ? 'white' : 'text.primary',
-                    fontSize: 12,
-                    fontWeight: 500,
+                    ...(filters.tensorParallelisms.includes(tp) ? selectedChipSx : softBlueChipSx),
                     minWidth: 'fit-content'
                   }}>
                     TP:{tp}
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Chip Filter */}
-          <FormControl size="small" sx={{ minWidth: { xs: 90, md: 150 } }}>
-            <InputLabel sx={{ fontSize: { xs: 10, md: 12 } }}>Chips</InputLabel>
-            <Select
-              multiple
-              value={filters.chips}
-              onChange={handleMultiSelectChange('chips')}
-              input={<OutlinedInput label="Chips" />}
-              sx={{ fontSize: { xs: 10, md: 12 }, height: { xs: 24, md: 32 } }}
-              renderValue={(selected) => (
-                selected.length > 1
-                  ? `${selected.length} selected`
-                  : selected.length === 1
-                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={softBlueChipSx} />
-                    : null
-              )}
-            >
-              {filterOptions.chips.map((chip) => (
-                <MenuItem key={chip} value={chip} sx={{ py: 0.5 }}>
-                  <Checkbox checked={filters.chips.includes(chip)} size="small" />
-                  <Box sx={{
-                    ml: 1,
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: 1,
-                    bgcolor: filters.chips.includes(chip) ? 'primary.main' : 'action.hover',
-                    color: filters.chips.includes(chip) ? 'white' : 'text.primary',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    minWidth: 'fit-content'
-                  }}>
-                    {chip}
                   </Box>
                 </MenuItem>
               ))}
@@ -755,7 +755,7 @@ export default function Dashboard() {
                 selected.length > 1
                   ? `${selected.length} selected`
                   : selected.length === 1
-                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={softBlueChipSx} />
+                    ? <Chip key={selected[0]} label={selected[0]} size="small" sx={selectedChipSx} />
                     : null
               )}
             >
@@ -766,11 +766,7 @@ export default function Dashboard() {
                     ml: 1,
                     px: 1,
                     py: 0.25,
-                    borderRadius: 1,
-                    bgcolor: filters.precisions.includes(precision) ? 'primary.main' : 'action.hover',
-                    color: filters.precisions.includes(precision) ? 'white' : 'text.primary',
-                    fontSize: 12,
-                    fontWeight: 500,
+                    ...(filters.precisions.includes(precision) ? selectedChipSx : softBlueChipSx),
                     minWidth: 'fit-content'
                   }}>
                     {precision}
@@ -1052,6 +1048,15 @@ export default function Dashboard() {
                               selectedModel={selectedModel}
                             />
                           )}
+                          theme={{
+                            crosshair: {
+                              line: {
+                                stroke: theme.palette.mode === 'dark' ? theme.palette.primary.main : '#222',
+                                strokeWidth: 2,
+                                strokeDasharray: '6 4',
+                              },
+                            },
+                          }}
                         />
                         {/* Custom Legend Box - Desktop Only */}
                         <Box sx={{
