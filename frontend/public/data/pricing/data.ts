@@ -13,7 +13,7 @@ export const MI300X_PRICING = [
     on_demand_dollar_per_gpu_hour: 2.69,
   },
   {
-    provider: "Hot  Aisle",
+    provider: "Hot Aisle",
     on_demand_dollar_per_gpu_hour: 1.99,
   },
   {
